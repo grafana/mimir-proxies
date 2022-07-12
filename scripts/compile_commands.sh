@@ -16,7 +16,7 @@ COMMIT_UNIX_TIMESTAMP="$(git show -s --format=%ct "${GIT_COMMIT}")"
 # DOCKER_TAG="$(bash scripts/docker-tag.sh)"
 DOCKER_TAG="TODO"
 
-for cmd in datadog-proxy-writes
+for cmd in datadog-proxy-writes graphite-proxy-writes
 do
     go build \
     -tags netgo \
