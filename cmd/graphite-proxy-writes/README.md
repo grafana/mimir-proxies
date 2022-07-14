@@ -1,4 +1,4 @@
-# graphite-proxy-writes: A Graphite Proxy for Mimir
+# graphite-proxy-writes: A Graphite proxy for Mimir
 
 graphite-proxy-writes is a proxy that accepts metrics via the Graphite protocol and writes them to Mimir. The destination can be a local Mimir server or a Grafana Cloud instance/stack.
 
@@ -46,7 +46,7 @@ The default TCP port for the write proxy is 8000 however it is best to choose a 
 
 If Mimir is configured to listen on port 9009 on localhost then the remote write endpoint will be http://localhost:9009/api/v1/push 
 
-### Label Name validation
+### Label-name validation
 
 If you have tagged metrics with label names containing characters not supported by Mimir then you will need to add the `-skip-label-validation` command line argument when running `graphite-proxy-writes`. In order to maintain compatibility with Prometheus, Mimir only accepts label names that match the following regex `[a-zA-Z_:][a-zA-Z0-9_:]*` by default. Setting the `-skip-label-validation` command line argument of the Graphite write proxy makes it send the `X-Mimir-SkipLabelNameValidation` header with each metric push, which tells Mimir to skip its strict label name validation. This also needs to be [enabled within Mimir itself](https://grafana.com/docs/mimir/latest/operators-guide/configuring/reference-configuration-parameters/) with the `skip_label_name_validation_header_enabled` configuration parameter.
 
