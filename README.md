@@ -1,3 +1,5 @@
+<a href="https://goreportcard.com/report/github.com/grafana/mimir-proxies"><img src="https://goreportcard.com/badge/github.com/grafana/mimir-proxies" alt="Go Report Card" /></a>
+
 # Grafana Mimir proxies
 
 Grafana Mimir proxies are a collection of open source software projects that provide native ingest capability for third-party applications into [Mimir](https://grafana.com/oss/mimir/).
