@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/grafana/mimir-proxies/pkg/datadog/htstorage"
 	"github.com/grafana/mimir-proxies/pkg/datadog/htstorage/htstoragemock"
+	"github.com/grafana/mimir/pkg/mimirpb"
 
 	"github.com/grafana/mimir-proxies/pkg/datadog/ddprom"
 	"github.com/grafana/mimir-proxies/pkg/datadog/ddstructs"

@@ -20,8 +20,8 @@ import (
 
 	"github.com/grafana/influx2cortex/pkg/errorx"
 
-	cortexseries "github.com/grafana/mimir/pkg/storage/series"
 	"github.com/grafana/mimir-proxies/pkg/appcommon"
+	cortexseries "github.com/grafana/mimir/pkg/storage/series"
 	conntrack "github.com/mwitkow/go-conntrack"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/api"
