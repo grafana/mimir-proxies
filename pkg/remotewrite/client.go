@@ -32,8 +32,6 @@ import (
 const (
 	// maxErrMsgLen is copied from github.com/prometheus/prometheus/storage/remote
 	maxErrMsgLen = 512
-
-	userAgent = "datadog-proxy/ingester"
 )
 
 const defaultWriteTimeout = 1 * time.Second
@@ -51,6 +49,7 @@ type Config struct {
 	MaxIdleConns        int           `yaml:"max_idle_conns"`
 	MaxConns            int           `yaml:"max_conns"`
 	SkipLabelValidation bool          `yaml:"skip_label_validation"`
+	UserAgent           string        `yaml:"user_agent"`
 }
 
 // RegisterFlags implements flagext.Registerer
@@ -72,6 +71,7 @@ func (c *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	flags.IntVar(&c.MaxIdleConns, prefix+"write-max-idle-conns", 10, "Max idle conns per host for writes to upstream Prometheus remote write API.")
 	flags.IntVar(&c.MaxConns, prefix+"write-max-conns", 100, "Max open conns per host for writes to upstream Prometheus remote write API.")
 	flags.BoolVar(&c.SkipLabelValidation, prefix+"skip-label-validation", false, "If set to true sends requests with headers to skip label validation.")
+	flags.StringVar(&c.UserAgent, prefix+"user-agent", "", "User agent for proxy ingester")
 }
 
 // NewClient creates the default http implementation of the Client
@@ -138,7 +138,7 @@ func (c *client) Write(ctx context.Context, req *mimirpb.WriteRequest) error {
 
 	httpReq.Header.Add("Content-Encoding", "snappy")
 	httpReq.Header.Set("Content-Type", "application/x-protobuf")
-	httpReq.Header.Set("User-Agent", userAgent)
+	httpReq.Header.Set("User-Agent", c.cfg.UserAgent)
 	httpReq.Header.Set("X-Prometheus-Remote-Write-Version", "0.1.0")
 	if c.cfg.SkipLabelValidation {
 		httpReq.Header.Set(push.SkipLabelNameValidationHeader, "true")
