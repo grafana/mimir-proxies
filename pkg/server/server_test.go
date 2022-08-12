@@ -2,6 +2,7 @@ package server
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -17,7 +18,8 @@ import (
 func TestServerRun(t *testing.T) {
 	var cfg Config
 	cfg.RegisterFlags(flag.NewFlagSet("", flag.ExitOnError))
-	cfg.HTTPListenPort = 9097 // Override to avoid conflicting with other ports
+	cfg.HTTPListenPort = 0
+	cfg.HTTPListenAddress = "127.0.0.1"
 
 	logger := log.NewNopLogger()
 
@@ -28,10 +30,13 @@ func TestServerRun(t *testing.T) {
 		w.WriteHeader(204)
 	})
 
-	go server.Run()
+	go func() {
+		require.NoError(t, server.Run())
+	}()
+
 	defer server.Shutdown(nil)
 
-	req, err := http.NewRequest("GET", "http://127.0.0.1:9097/test", http.NoBody)
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://%s/test", server.Addr()), http.NoBody)
 	require.NoError(t, err)
 	_, err = http.DefaultClient.Do(req)
 	require.NoError(t, err)

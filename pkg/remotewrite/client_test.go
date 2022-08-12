@@ -123,7 +123,7 @@ func TestHTTPRemoteWriteClient_Write(t *testing.T) {
 }
 
 const outOfOrderSampleResponseText = "user=41413: err: out of order sample. " +
-	`timestamp=2021-02-16T10:07:30Z, series={__name__=\"datadog_dot_dogstatsd_dot_client_dot_events\", ` +
+	`timestamp=2021-02-16T10:07:30Z, series={__name__=\"my_proxy_dot_statsd_dot_client_dot_events\", ` +
 	`client=\"go\", client__transport=\"udp\", client__version=\"4.2.0\", ` +
 	`cluster__name=\"dev-cluster\", ` +
 	`host=\"cluster.dev.internal\", ` +
