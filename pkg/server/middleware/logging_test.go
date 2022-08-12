@@ -23,7 +23,7 @@ func TestLogRequest(t *testing.T) {
 		buf := new(bytes.Buffer)
 		logger := log.NewLogfmtLogger(buf)
 
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://grafana.net%s?api_key=%s", path, secretAPIKey), http.NoBody)
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://example.com%s?api_key=%s", path, secretAPIKey), http.NoBody)
 		require.NoError(t, err)
 
 		logRequest(logger, req, http.StatusOK)
@@ -41,7 +41,7 @@ func TestLogRequest(t *testing.T) {
 		buf := new(bytes.Buffer)
 		logger := log.NewLogfmtLogger(buf)
 
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://grafana.net%s?api_key=%s", path, grafanaLabsAPIKey), http.NoBody)
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://example.com%s?api_key=%s", path, grafanaLabsAPIKey), http.NoBody)
 		require.NoError(t, err)
 
 		logRequest(logger, req, http.StatusOK)
@@ -59,7 +59,7 @@ func TestLogRequest(t *testing.T) {
 		buf := new(bytes.Buffer)
 		logger := log.NewLogfmtLogger(buf)
 
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://grafana.net%s", path), http.NoBody)
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://example.com%s", path), http.NoBody)
 		require.NoError(t, err)
 
 		logRequest(logger, req, http.StatusOK)

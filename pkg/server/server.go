@@ -65,16 +65,16 @@ func (cfg *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	if prefix != "" && !strings.HasSuffix(prefix, ".") {
 		prefix += "."
 	}
-	flags.StringVar(&cfg.HTTPListenAddress, prefix+"server.http-listen-address", "0.0.0.0", "Sets listen address for the http server.")
-	flags.IntVar(&cfg.HTTPListenPort, prefix+"server.http-listen-port", defaultListenPort, "Sets listen address port for the http server.")
-	flags.IntVar(&cfg.HTTPConnLimit, prefix+"server.http-listen-conn-limit", 0, "Sets a limit to the amount of http connections. Defaults to no limit.")
-	flags.DurationVar(&cfg.ServerGracefulShutdownTimeout, prefix+"server.graceful-shutdown-timeout", defaultServerGracefulShutdown, "Graceful shutdown period. Defaults to 5 seconds.")
-	flags.DurationVar(&cfg.HTTPServerReadTimeout, prefix+"server.http-server-read-timeout", defaultHTTPReadTimeout, "HTTP request read timeout. Defaults to 30 seconds.")
-	flags.DurationVar(&cfg.HTTPServerWriteTimeout, prefix+"server.http-server-write-timeout", defaultHTTPWriteimeout, "HTTP request write timeout. Defaults to 30 seconds.")
-	flags.DurationVar(&cfg.HTTPServerIdleTimeout, prefix+"server.http-server-idle-timeout", defaultHTTPIdleimeout, "HTTP request idle timeout. Defaults to 30 seconds.")
-	flags.Int64Var(&cfg.HTTPMaxRequestSizeLimit, prefix+"server.http-max-req-size-limit", defaultHTTPRequestSizeLimit, "HTTP max request body size limit. Defaults to 10 mb.")
+	flags.StringVar(&cfg.HTTPListenAddress, prefix+"server.http-listen-address", "0.0.0.0", "Sets listen address for the http server")
+	flags.IntVar(&cfg.HTTPListenPort, prefix+"server.http-listen-port", defaultListenPort, "Sets listen address port for the http server")
+	flags.IntVar(&cfg.HTTPConnLimit, prefix+"server.http-listen-conn-limit", 0, "Sets a limit to the amount of http connections, 0 means no limit")
+	flags.DurationVar(&cfg.ServerGracefulShutdownTimeout, prefix+"server.graceful-shutdown-timeout", defaultServerGracefulShutdown, "Graceful shutdown period")
+	flags.DurationVar(&cfg.HTTPServerReadTimeout, prefix+"server.http-server-read-timeout", defaultHTTPReadTimeout, "HTTP request read timeout")
+	flags.DurationVar(&cfg.HTTPServerWriteTimeout, prefix+"server.http-server-write-timeout", defaultHTTPWriteimeout, "HTTP request write timeout")
+	flags.DurationVar(&cfg.HTTPServerIdleTimeout, prefix+"server.http-server-idle-timeout", defaultHTTPIdleimeout, "HTTP request idle timeout")
+	flags.Int64Var(&cfg.HTTPMaxRequestSizeLimit, prefix+"server.http-max-req-size-limit", defaultHTTPRequestSizeLimit, "HTTP max request body size limit in MB")
 	flags.StringVar(&cfg.PathPrefix, prefix+"server.path-prefix", "", "Base path to serve all API routes from (e.g. /v1/)")
-	flags.IntVar(&cfg.GRPCListenPort, prefix+"server.grpc-listen-port", defaultGrpcPort, "Sets listen address port for the http server.")
+	flags.IntVar(&cfg.GRPCListenPort, prefix+"server.grpc-listen-port", defaultGrpcPort, "Sets listen address port for the http server")
 }
 
 // Server initializes an Router webserver as well as the desired middleware configuration
