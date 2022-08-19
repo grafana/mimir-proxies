@@ -50,8 +50,8 @@ func (c *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 
 //go:generate mockery --output apimock --outpkg apimock --case underscore --name API
 type API interface {
-	Query(ctx context.Context, query string, ts time.Time) (model.Value, v1.Warnings, error)
-	QueryRange(ctx context.Context, query string, r v1.Range) (model.Value, v1.Warnings, error)
+	Query(ctx context.Context, query string, ts time.Time, opts ...v1.Option) (model.Value, v1.Warnings, error)
+	QueryRange(ctx context.Context, query string, r v1.Range, opts ...v1.Option) (model.Value, v1.Warnings, error)
 	Series(ctx context.Context, matches []string, startTime time.Time, endTime time.Time) ([]model.LabelSet, v1.Warnings, error)
 	LabelNames(ctx context.Context, matches []string, startTime time.Time, endTime time.Time) ([]string, v1.Warnings, error)
 	LabelValues(ctx context.Context, label string, matches []string, startTime time.Time, endTime time.Time) (model.LabelValues, v1.Warnings, error)
@@ -73,14 +73,14 @@ func mapAPIError(err error) error {
 	return err
 }
 
-func (e errorMappingAPI) Query(ctx context.Context, query string, ts time.Time) (_ model.Value, _ v1.Warnings, err error) {
+func (e errorMappingAPI) Query(ctx context.Context, query string, ts time.Time, opts ...v1.Option) (_ model.Value, _ v1.Warnings, err error) {
 	defer func() { err = mapAPIError(err) }()
-	return e.api.Query(ctx, query, ts)
+	return e.api.Query(ctx, query, ts, opts...)
 }
 
-func (e errorMappingAPI) QueryRange(ctx context.Context, query string, r v1.Range) (_ model.Value, _ v1.Warnings, err error) {
+func (e errorMappingAPI) QueryRange(ctx context.Context, query string, r v1.Range, opts ...v1.Option) (_ model.Value, _ v1.Warnings, err error) {
 	defer func() { err = mapAPIError(err) }()
-	return e.api.QueryRange(ctx, query, r)
+	return e.api.QueryRange(ctx, query, r, opts...)
 }
 
 func (e errorMappingAPI) Series(ctx context.Context, matches []string, startTime, endTime time.Time) (_ []model.LabelSet, _ v1.Warnings, err error) {
