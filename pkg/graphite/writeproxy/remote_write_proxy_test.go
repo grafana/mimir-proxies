@@ -47,8 +47,10 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 			},
 			recorderMock: func() *MockRecorder {
 				recorderMock := &MockRecorder{}
+				recorderMock.On("measureIncomingRequest", "fake").Return(nil)
 				recorderMock.On("measureIncomingSamples", "fake", 1).Return(nil)
 				recorderMock.On("measureConversionDuration", "fake", mock.Anything).Return(nil)
+				recorderMock.On("measureReceivedRequest", "fake").Return(nil)
 				recorderMock.On("measureReceivedSamples", "fake", 1).Return(nil)
 				return recorderMock
 			},
@@ -96,8 +98,10 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 			},
 			recorderMock: func() *MockRecorder {
 				recorderMock := &MockRecorder{}
+				recorderMock.On("measureIncomingRequest", "fake").Return(nil)
 				recorderMock.On("measureIncomingSamples", "fake", 1).Return(nil)
 				recorderMock.On("measureConversionDuration", "fake", mock.Anything).Return(nil)
+				recorderMock.On("measureReceivedRequest", "fake").Return(nil)
 				recorderMock.On("measureReceivedSamples", "fake", 1).Return(nil)
 				return recorderMock
 			},
@@ -146,8 +150,10 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 			},
 			recorderMock: func() *MockRecorder {
 				recorderMock := &MockRecorder{}
+				recorderMock.On("measureIncomingRequest", "fake").Return(nil)
 				recorderMock.On("measureIncomingSamples", "fake", 1).Return(nil)
 				recorderMock.On("measureConversionDuration", "fake", mock.Anything).Return(nil)
+				recorderMock.On("measureReceivedRequest", "fake").Return(nil)
 				recorderMock.On("measureReceivedSamples", "fake", 1).Return(nil)
 				return recorderMock
 			},
@@ -196,8 +202,10 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 			},
 			recorderMock: func() *MockRecorder {
 				recorderMock := &MockRecorder{}
+				recorderMock.On("measureIncomingRequest", "fake").Return(nil)
 				recorderMock.On("measureIncomingSamples", "fake", 1).Return(nil)
 				recorderMock.On("measureConversionDuration", "fake", mock.Anything).Return(nil)
+				recorderMock.On("measureReceivedRequest", "fake").Return(nil)
 				recorderMock.On("measureReceivedSamples", "fake", 1).Return(nil)
 				return recorderMock
 			},
@@ -244,8 +252,10 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 			},
 			recorderMock: func() *MockRecorder {
 				recorderMock := &MockRecorder{}
+				recorderMock.On("measureIncomingRequest", "fake").Return(nil)
 				recorderMock.On("measureIncomingSamples", "fake", 1).Return(nil)
 				recorderMock.On("measureConversionDuration", "fake", mock.Anything).Return(nil)
+				recorderMock.On("measureReceivedRequest", "fake").Return(nil)
 				recorderMock.On("measureReceivedSamples", "fake", 1).Return(nil)
 				recorderMock.On("measureRejectedSamples", "fake", "name_cannot_be_empty").Return(nil)
 				return recorderMock
@@ -293,8 +303,10 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 			},
 			recorderMock: func() *MockRecorder {
 				recorderMock := &MockRecorder{}
+				recorderMock.On("measureIncomingRequest", "fake").Return(nil)
 				recorderMock.On("measureIncomingSamples", "fake", 1).Return(nil)
 				recorderMock.On("measureConversionDuration", "fake", mock.Anything).Return(nil)
+				recorderMock.On("measureReceivedRequest", "fake").Return(nil)
 				recorderMock.On("measureReceivedSamples", "fake", 1).Return(nil)
 				recorderMock.On("measureRejectedSamples", "fake", "invalid_mtype").Return(nil)
 				return recorderMock

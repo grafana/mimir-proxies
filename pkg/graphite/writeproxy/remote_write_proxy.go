@@ -68,7 +68,8 @@ func (wp *RemoteWriteProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Counting the number of samples before validation.
+	// Counting the request and number of samples before validation.
+	wp.recorder.measureIncomingRequest(userID)
 	wp.recorder.measureIncomingSamples(userID, len(metrics))
 
 	var firstValidationError error
@@ -118,7 +119,8 @@ func (wp *RemoteWriteProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Counting the number of samples after validation.
+	// Counting the request and number of samples after validation.
+	wp.recorder.measureReceivedRequest(userID)
 	wp.recorder.measureReceivedSamples(userID, len(series))
 
 	w.WriteHeader(http.StatusOK)
