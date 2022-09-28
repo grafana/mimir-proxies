@@ -21,8 +21,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/grafana/mimir-proxies/pkg/errorx"
 	"github.com/grafana/mimir-proxies/pkg/ctxlog"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 )
 
 const (
