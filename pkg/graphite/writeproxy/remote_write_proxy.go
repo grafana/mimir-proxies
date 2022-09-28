@@ -17,7 +17,7 @@ import (
 
 	"github.com/grafana/mimir/pkg/util/spanlogger"
 
-	"github.com/grafana/influx2cortex/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 
 	"github.com/grafana/metrictank/schema"
 	"github.com/grafana/metrictank/schema/msg"

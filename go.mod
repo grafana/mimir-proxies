@@ -7,6 +7,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.2
 	github.com/go-kit/log v0.2.0
 	github.com/gogo/protobuf v1.3.2
+	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4
 	github.com/gorilla/mux v1.8.0
 	github.com/grafana/dskit v0.0.0-20220817135401-71aee950db17
@@ -45,7 +46,6 @@ require (
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/gogo/googleapis v1.4.0 // indirect
 	github.com/gogo/status v1.1.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0-rc.2.0.20201207153454-9f6bf00c00a7 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
@@ -70,7 +70,6 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/thanos-io/thanos v0.24.0 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
-	github.com/vektra/mockery v1.1.2 // indirect
 	github.com/weaveworks/promrus v1.2.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/goleak v1.1.12 // indirect

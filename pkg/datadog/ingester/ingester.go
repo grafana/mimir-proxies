@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/mimir-proxies/pkg/datadog/htstorage"
 	"github.com/grafana/mimir-proxies/pkg/remotewrite"
 
-	"github.com/grafana/influx2cortex/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 )
 
 type ingester struct {

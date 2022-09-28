@@ -26,7 +26,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/weaveworks/common/user"
 
-	"github.com/grafana/influx2cortex/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 )
 
 const (
