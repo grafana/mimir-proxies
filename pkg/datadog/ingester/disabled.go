@@ -5,7 +5,7 @@ import (
 
 	"github.com/grafana/mimir-proxies/pkg/datadog/ddstructs"
 
-	"github.com/grafana/influx2cortex/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 )
 
 type disabledIngester struct{}

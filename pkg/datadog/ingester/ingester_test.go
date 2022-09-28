@@ -14,7 +14,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/grafana/influx2cortex/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 	"github.com/prometheus/prometheus/prompb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

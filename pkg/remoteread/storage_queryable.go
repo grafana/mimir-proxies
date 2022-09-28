@@ -18,7 +18,7 @@ import (
 
 	labelsutil "github.com/grafana/mimir-proxies/pkg/util/labels"
 
-	"github.com/grafana/influx2cortex/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 
 	"github.com/grafana/mimir-proxies/pkg/appcommon"
 	cortexseries "github.com/grafana/mimir/pkg/storage/series"

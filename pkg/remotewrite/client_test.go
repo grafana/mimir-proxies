@@ -12,7 +12,7 @@ import (
 	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/grafana/mimir/pkg/util/push"
 
-	"github.com/grafana/influx2cortex/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 
 	"github.com/weaveworks/common/user"
 

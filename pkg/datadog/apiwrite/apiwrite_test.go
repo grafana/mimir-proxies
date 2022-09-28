@@ -21,7 +21,7 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 
 	"github.com/go-kit/log"
-	"github.com/grafana/influx2cortex/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
 	"github.com/grafana/mimir-proxies/pkg/ctxlog"
 	"github.com/grafana/mimir-proxies/pkg/server"
 	"github.com/prometheus/client_golang/prometheus"
