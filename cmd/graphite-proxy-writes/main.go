@@ -7,8 +7,9 @@ import (
 
 	opentracing "github.com/opentracing/opentracing-go"
 
-	"github.com/grafana/influx2cortex/pkg/route"
+	"github.com/grafana/mimir-proxies/pkg/appcommon"
 	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
+	"github.com/grafana/mimir-proxies/pkg/route"
 
 	"github.com/grafana/mimir/pkg/util/log"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/grafana/mimir-proxies/pkg/remotewrite"
 
 	"github.com/grafana/dskit/flagext"
-	"github.com/grafana/mimir-proxies/pkg/appcommon"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
