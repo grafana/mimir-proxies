@@ -11,18 +11,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafana/influx2cortex/pkg/route"
-
-	"github.com/grafana/mimir-proxies/pkg/datadog/ingester"
-
+	"github.com/grafana/mimir-proxies/pkg/ctxlog"
 	"github.com/grafana/mimir-proxies/pkg/datadog/ddstructs"
+	"github.com/grafana/mimir-proxies/pkg/datadog/ingester"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/route"
 
 	"github.com/opentracing/opentracing-go"
 
 	"github.com/gorilla/mux"
-
-	"github.com/grafana/mimir-proxies/pkg/ctxlog"
-	"github.com/grafana/mimir-proxies/pkg/errorx"
 )
 
 const (
