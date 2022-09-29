@@ -11,7 +11,6 @@ require (
 	github.com/golang/snappy v0.0.4
 	github.com/gorilla/mux v1.8.0
 	github.com/grafana/dskit v0.0.0-20220817135401-71aee950db17
-	github.com/grafana/influx2cortex v0.0.0-20220425215839-914725b23c60
 	github.com/grafana/metrictank v1.0.0
 	github.com/grafana/mimir v0.0.0-20220121165517-53d4f5914b50
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f
@@ -32,6 +31,7 @@ require (
 )
 
 require (
+	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/aws/aws-sdk-go v1.42.28 // indirect
@@ -57,6 +57,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
+	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opentracing-contrib/go-grpc v0.0.0-20210225150812-73cb765af46e // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
