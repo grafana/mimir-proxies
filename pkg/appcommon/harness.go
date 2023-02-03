@@ -32,9 +32,10 @@ var (
 )
 
 type Config struct {
-	InstrumentBuckets string `yaml:"instrument_buckets"`
-	EnableAuth        bool   `yaml:"enable_auth"`
-	ServiceName       string `yaml:"service_name"`
+	InstrumentBuckets string             `yaml:"instrument_buckets"`
+	EnableAuth        bool               `yaml:"enable_auth"`
+	ServiceName       string             `yaml:"service_name"`
+	Tracer            opentracing.Tracer `yaml:"-"`
 
 	ServerConfig         server.Config         `yaml:"server_config"`
 	InternalServerConfig internalserver.Config `yaml:"internal_server_config"`
@@ -112,13 +113,16 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string) (app App, e
 		return app, fmt.Errorf("can't initialize the instrumentation middleware %w", err)
 	}
 
-	tracer, closer, err := NewTracer(cfg.ServiceName, logger)
-	if err != nil {
-		return app, err
+	app.Tracer = cfg.Tracer
+	if cfg.Tracer == nil {
+		tracer, closer, err := NewTracer(cfg.ServiceName, logger)
+		if err != nil {
+			return app, err
+		}
+		app.closers = append(app.closers, closer.Close)
+		app.Tracer = tracer
 	}
-	app.closers = append(app.closers, closer.Close)
-	app.Tracer = tracer
-	tracerMiddleware := middleware.NewTracer(router, tracer)
+	tracerMiddleware := middleware.NewTracer(router, app.Tracer)
 
 	logMiddleware := middleware.NewLoggingMiddleware(logger)
 
