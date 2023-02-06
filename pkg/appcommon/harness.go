@@ -113,8 +113,9 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string) (app App, e
 		return app, fmt.Errorf("can't initialize the instrumentation middleware %w", err)
 	}
 
-	app.Tracer = cfg.Tracer
-	if cfg.Tracer == nil {
+	if cfg.Tracer != nil {
+		app.Tracer = cfg.Tracer
+	} else {
 		tracer, closer, err := NewTracer(cfg.ServiceName, logger)
 		if err != nil {
 			return app, err
