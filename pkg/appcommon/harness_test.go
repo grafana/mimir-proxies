@@ -73,7 +73,7 @@ func TestApp_Config_Tracer(t *testing.T) {
 		defer resetTracingGlobals(t)
 
 		tracer := mocktracer.New()
-		app, err := New(Config{ServiceName: "test", Tracer: tracer, InstrumentBuckets: "0.1"}, prometheus.NewRegistry(), "")
+		app, err := New(Config{ServiceName: "test", InstrumentBuckets: "0.1"}, prometheus.NewRegistry(), "", tracer)
 		require.NoError(t, err)
 		require.Equal(t, tracer, opentracing.GlobalTracer())
 
@@ -84,7 +84,7 @@ func TestApp_Config_Tracer(t *testing.T) {
 	t.Run("new global tracer created if config tracer is nil", func(t *testing.T) {
 		defer resetTracingGlobals(t)
 
-		app, err := New(Config{ServiceName: "test", Tracer: nil, InstrumentBuckets: "0.1"}, prometheus.NewRegistry(), "")
+		app, err := New(Config{ServiceName: "test", InstrumentBuckets: "0.1"}, prometheus.NewRegistry(), "", nil)
 		require.NoError(t, err)
 		require.NotNil(t, opentracing.GlobalTracer())
 

@@ -32,10 +32,9 @@ var (
 )
 
 type Config struct {
-	InstrumentBuckets string             `yaml:"instrument_buckets"`
-	EnableAuth        bool               `yaml:"enable_auth"`
-	ServiceName       string             `yaml:"service_name"`
-	Tracer            opentracing.Tracer `yaml:"-"`
+	InstrumentBuckets string `yaml:"instrument_buckets"`
+	EnableAuth        bool   `yaml:"enable_auth"`
+	ServiceName       string `yaml:"service_name"`
 
 	ServerConfig         server.Config         `yaml:"server_config"`
 	InternalServerConfig internalserver.Config `yaml:"internal_server_config"`
@@ -81,7 +80,7 @@ func init() {
 
 // New creates a new App.
 // Callers should call App.Close() after use.
-func New(cfg Config, reg prometheus.Registerer, metricPrefix string) (app App, err error) {
+func New(cfg Config, reg prometheus.Registerer, metricPrefix string, tracer opentracing.Tracer) (app App, err error) {
 	if cfg.ServiceName == "" {
 		return app, fmt.Errorf("service name can't be empty")
 	}
@@ -113,8 +112,8 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string) (app App, e
 		return app, fmt.Errorf("can't initialize the instrumentation middleware %w", err)
 	}
 
-	if cfg.Tracer != nil {
-		app.Tracer = cfg.Tracer
+	if tracer != nil {
+		app.Tracer = tracer
 	} else {
 		tracer, closer, err := NewTracer(cfg.ServiceName, logger)
 		if err != nil {

@@ -41,7 +41,7 @@ func Run() (err error) {
 	reg := prometheus.DefaultRegisterer
 
 	var app appcommon.App
-	app, err = appcommon.New(appConfig, reg, metricPrefix)
+	app, err = appcommon.New(appConfig, reg, metricPrefix, nil)
 	if err != nil {
 		return err
 	}
