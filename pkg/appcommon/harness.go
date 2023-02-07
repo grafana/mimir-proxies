@@ -80,7 +80,7 @@ func init() {
 
 // New creates a new App.
 // Callers should call App.Close() after use.
-func New(cfg Config, reg prometheus.Registerer, metricPrefix string) (app App, err error) {
+func New(cfg Config, reg prometheus.Registerer, metricPrefix string, tracer opentracing.Tracer) (app App, err error) {
 	if cfg.ServiceName == "" {
 		return app, fmt.Errorf("service name can't be empty")
 	}
@@ -112,13 +112,17 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string) (app App, e
 		return app, fmt.Errorf("can't initialize the instrumentation middleware %w", err)
 	}
 
-	tracer, closer, err := NewTracer(cfg.ServiceName, logger)
-	if err != nil {
-		return app, err
+	if tracer != nil {
+		app.Tracer = tracer
+	} else {
+		tracer, closer, err := NewTracer(cfg.ServiceName, logger)
+		if err != nil {
+			return app, err
+		}
+		app.closers = append(app.closers, closer.Close)
+		app.Tracer = tracer
 	}
-	app.closers = append(app.closers, closer.Close)
-	app.Tracer = tracer
-	tracerMiddleware := middleware.NewTracer(router, tracer)
+	tracerMiddleware := middleware.NewTracer(router, app.Tracer)
 
 	logMiddleware := middleware.NewLoggingMiddleware(logger)
 
