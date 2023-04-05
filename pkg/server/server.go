@@ -72,7 +72,7 @@ func (cfg *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	flags.DurationVar(&cfg.HTTPServerReadTimeout, prefix+"server.http-server-read-timeout", defaultHTTPReadTimeout, "HTTP request read timeout")
 	flags.DurationVar(&cfg.HTTPServerWriteTimeout, prefix+"server.http-server-write-timeout", defaultHTTPWriteimeout, "HTTP request write timeout")
 	flags.DurationVar(&cfg.HTTPServerIdleTimeout, prefix+"server.http-server-idle-timeout", defaultHTTPIdleimeout, "HTTP request idle timeout")
-	flags.Int64Var(&cfg.HTTPMaxRequestSizeLimit, prefix+"server.http-max-req-size-limit", defaultHTTPRequestSizeLimit, "HTTP max request body size limit in MB")
+	flags.Int64Var(&cfg.HTTPMaxRequestSizeLimit, prefix+"server.http-max-req-size-limit", defaultHTTPRequestSizeLimit, "HTTP max request body size limit in bytes")
 	flags.StringVar(&cfg.PathPrefix, prefix+"server.path-prefix", "", "Base path to serve all API routes from (e.g. /v1/)")
 	flags.IntVar(&cfg.GRPCListenPort, prefix+"server.grpc-listen-port", defaultGrpcPort, "Sets listen address port for the http server")
 }

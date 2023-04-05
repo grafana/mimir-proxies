@@ -19,7 +19,8 @@ func NewRequestLimitsMiddleware(maxRequestBodySize int64) *RequestLimits {
 
 func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, err := io.ReadAll(r.Body)
+		reader := io.LimitReader(r.Body, int64(l.maxRequestBodySize)+1)
+		body, err := io.ReadAll(reader)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("failed to read request body: %v", err), http.StatusInternalServerError)
 			return
