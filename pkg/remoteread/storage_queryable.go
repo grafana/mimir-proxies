@@ -272,7 +272,7 @@ func fromQueryResult(sortSeries bool, res *prompb.QueryResult) storage.SeriesSet
 	series := make([]storage.Series, 0, len(res.Timeseries))
 	for _, ts := range res.Timeseries {
 		lbls := labelsutil.LabelProtosToLabels(ts.Labels)
-		series = append(series, cortexseries.NewConcreteSeries(lbls, sampleProtosToSamples(ts.Samples)))
+		series = append(series, cortexseries.NewConcreteSeries(lbls, sampleProtosToSamples(ts.Samples), nil))
 	}
 
 	if sortSeries {
