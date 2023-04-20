@@ -1,0 +1,23 @@
+# Note: This currenlt only builds mimir-whisper-converter.
+# If we want to build more binaries later, that would be fine.
+builds:
+  - id: "mimir-whisper-converter"
+    main: ./cmd/mimir-whisper-converter
+    binary: mimir-whisper-converter
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      386: i386
+      amd64: x86_64
+    files:
+      - none*
+    name_template: "mimir-whisper-converter_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
+changelog:
+  skip: true

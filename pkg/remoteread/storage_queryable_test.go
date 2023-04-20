@@ -15,6 +15,7 @@ import (
 	"github.com/grafana/mimir/pkg/scheduler/queue"
 
 	"github.com/prometheus/prometheus/storage"
+	"github.com/prometheus/prometheus/tsdb/chunkenc"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/prometheus/config"
@@ -90,13 +91,13 @@ func TestStorageQueryable_Querier_Select(t *testing.T) {
 		series := set.At()
 		require.Equal(t, labels.Labels{{Name: labels.MetricName, Value: "test_metric1"}, {Name: "baz", Value: "qux"}, {Name: "foo", Value: "bar"}}, series.Labels())
 
-		it := series.Iterator()
-		require.True(t, it.Next())
+		it := series.Iterator(nil)
+		require.Equal(t, chunkenc.ValFloat, it.Next())
 
 		ts, val := it.At()
 		require.Equal(t, int64(60e3), ts)
 		require.Equal(t, float64(2), val)
-		require.True(t, it.Next())
+		require.Equal(t, chunkenc.ValFloat, it.Next())
 
 		ts, val = it.At()
 		require.Equal(t, int64(120e3), ts)
