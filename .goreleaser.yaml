@@ -1,4 +1,4 @@
-# Note: This only builds one binary, which we need for distribution to a client.
+# Note: This currenlt only builds mimir-whisper-converter.
 # If we want to build more binaries later, that would be fine.
 builds:
   - id: "mimir-whisper-converter"
