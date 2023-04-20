@@ -15,7 +15,7 @@ check_required_setup() {
 
   # Ensure the repository has only 1 remote named "origin".
   if [ "$(git remote | grep origin)" != "origin" ]; then
-    echo "The release automation scripts require the git clone to have 1 remote named 'origin', but found:"
+    echo "The release automation scripts require the git clone to have a remote named 'origin', but found:"
     git remote
 
     exit 1

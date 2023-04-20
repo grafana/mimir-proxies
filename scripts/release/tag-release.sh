@@ -9,9 +9,12 @@ CURR_DIR="$(dirname "$0")"
 
 check_required_setup
 
+# The branch must be named release-X.Y.Z, and the corresponding
+# tag will be mimir-proxies-X.Y.Z
+
 # Ensure the current branch is a release one.
 BRANCH=$(git branch --show-current)
-if [[ ! $BRANCH =~ ^release-([0-9]+\.[0-9]+)$ ]]; then
+if [[ ! $BRANCH =~ ^release-([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
   echo "The current branch '${BRANCH}' is not a release branch." > /dev/stderr
   exit 1
 fi
@@ -27,7 +30,7 @@ if [[ ! $ACTUAL_VERSION =~ ^$BRANCH_VERSION ]]; then
 fi
 
 # Ask confirmation.
-read -p "You're about to tag the version '${ACTUAL_VERSION}'. Do you want to continue? (y/n) " -n 1 -r
+read -p "You're about to tag the version mimir-proxies-${ACTUAL_VERSION}. Do you want to continue? (y/n) " -n 1 -r
 echo ""
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Aborting ..." > /dev/stderr

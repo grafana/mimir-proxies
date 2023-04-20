@@ -19,5 +19,3 @@ archives:
     files:
       - none*
     name_template: "mimir-whisper-converter_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
-changelog:
-  skip: true

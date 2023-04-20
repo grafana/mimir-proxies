@@ -12,7 +12,8 @@ find_last_release
 
 # Build binaries and packages.
 echo "Building binaries (this may take a while)..."
-cd "${CURR_DIR}"/../../ && make dist packages && cd -
+export GORELEASER_CURRENT_TAG=v"$(cat VERSION)"
+cd "${CURR_DIR}"/../../ && goreleaser release --snapshot --rm-dist && cd -
 
 # Generate release notes draft.
 echo "Generating the draft release notes..."
@@ -27,7 +28,7 @@ gh release create \
   --prerelease \
   --title "${LAST_RELEASE_VERSION}" \
   --notes-file "${RELEASE_NOTES_FILE}" \
-  "${LAST_RELEASE_TAG}" "${CURR_DIR}"/../../dist/*
+  "${LAST_RELEASE_TAG}" "${CURR_DIR}"/../../dist/*.tar.gz
 
 # Print instructions to move on.
 echo ""
