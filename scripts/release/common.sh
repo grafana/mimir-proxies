@@ -13,7 +13,9 @@ check_required_setup() {
     exit 1
   fi
 
-  # Ensure the repository has only 1 remote named "origin".
+  # Ensure the repository has a remote named "origin". If the repo has more than
+  # one remote, there will be an error and the user will be prompted to select a
+  # default remote.
   if [ "$(git remote | grep origin)" != "origin" ]; then
     echo "The release automation scripts require the git clone to have a remote named 'origin', but found:"
     git remote
