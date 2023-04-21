@@ -19,3 +19,28 @@ There is plenty of work planned to refactor the existing proxies, and a common f
 Because of this, there may be changes to interfaces, code structure, command-line-arguments, etc but we will try to only make breaking changes where necessary. Despite these warnings, this is the fundamentally the code that is running in production at scale within Grafana Labs.
 
 We welcome issues/PRs if you have any suggestions or contributions for new proxies/formats/protocols to support.
+
+## Releasing
+
+Releasing is done manually, and is based on the scripts that Mimir uses.
+Releases will appear in the github project for mimir-proxies.
+
+Currently the release configuration only builds the mimir-whisper-converter, not
+all of the commands.
+
+1. Increment the version number in VERSION.
+2. Add a heading to CHANGELOG.md to describe the major changes.
+3. Create a release branch: `git checkout -b release-$(cat VERSION)`
+4. run `./scripts/release/tag-release.sh` to sign and tag the branch.
+5. run `./scripts/release/create-draft-release.sh`.
+6. Go to the link printed at the end of the build and upload, and check that the
+   release makes sense.
+7. Either fix it, or click Edit and Publish the release.
+
+If you run into problems with the tagged release, you can delete it. You'll need
+to do that both locally and remotely:
+
+```sh
+git tag -d mimir-proxies-$(cat VERSION)
+git push --delete origin mimir-proxies-$(cat VERSION)
+```
