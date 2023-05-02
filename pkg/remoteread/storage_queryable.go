@@ -5,30 +5,24 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"path"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
-
-	labelsutil "github.com/grafana/mimir-proxies/pkg/util/labels"
-
-	"github.com/grafana/mimir-proxies/pkg/errorx"
-
 	"github.com/grafana/mimir-proxies/pkg/appcommon"
-	cortexseries "github.com/grafana/mimir/pkg/storage/series"
-	conntrack "github.com/mwitkow/go-conntrack"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
+	remotereadstorage "github.com/grafana/mimir-proxies/pkg/remoteread/storage"
+
+	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
+	"github.com/mwitkow/go-conntrack"
+	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/api"
-	"github.com/prometheus/common/config"
-	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/model/labels"
-	"github.com/prometheus/prometheus/prompb"
 	"github.com/prometheus/prometheus/promql/parser"
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/storage/remote"
@@ -39,6 +33,7 @@ const (
 	endpointLabels      = apiPrefix + "/labels"
 	endpointLabelValues = apiPrefix + "/label/:name/values"
 	endpointRemoteRead  = apiPrefix + "/read"
+	endpointSeries      = apiPrefix + "/series"
 
 	tooManyRequestsErrorSubstr = "429 Too Many Requests: too many outstanding requests"
 )
@@ -54,6 +49,7 @@ type StorageQueryableConfig struct {
 }
 
 // RegisterFlagsWithPrefix registers flags, prepending the provided prefix if needed (no separation is added between the flag and the prefix)
+//
 //nolint:gomnd
 func (c *StorageQueryableConfig) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	flags.StringVar(&c.Address, prefix+".query-address", "http://localhost:80/prometheus", "Base URL for queries from upstream Prometheus API. The /api/v1 suffix will be appended to this address. Defaults to http://localhost:80/prometheus.")
@@ -65,20 +61,12 @@ func (c *StorageQueryableConfig) RegisterFlagsWithPrefix(prefix string, flags *f
 	flags.StringVar(&c.ClientName, prefix+".query-client-name", "graphite-querier", "Client name to use when identifying requests in Prometheus API.")
 }
 
-func NewStorageQueryable(cfg StorageQueryableConfig, tripperware querymiddleware.Tripperware) (storage.Queryable, error) {
+func NewStorageQueryable(cfg StorageQueryableConfig, tripperware querymiddleware.Tripperware) (remotereadstorage.Queryable, error) {
 	readURL, err := url.Parse(cfg.Address)
 	if err != nil {
 		return nil, fmt.Errorf("can't parse endpoint: %w", err)
 	}
 	readURL.Path = path.Join(readURL.Path, endpointRemoteRead)
-
-	remoteReadClient, err := remote.NewReadClient(cfg.ClientName, &remote.ClientConfig{
-		URL:     &config.URL{URL: readURL},
-		Timeout: model.Duration(cfg.Timeout),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("can't instantiate remote read client: %w", err)
-	}
 
 	httpTransport := http.DefaultTransport.(*http.Transport).Clone()
 	httpTransport.MaxIdleConnsPerHost = cfg.MaxIdleConns
@@ -99,13 +87,6 @@ func NewStorageQueryable(cfg StorageQueryableConfig, tripperware querymiddleware
 
 	httpClient := &http.Client{Transport: transport}
 
-	remoteClientStruct, ok := remoteReadClient.(*remote.Client)
-	if !ok {
-		return nil, fmt.Errorf("remote.ReadClient is expected to be *remote.Client but it was %T", remoteReadClient)
-	}
-
-	remoteClientStruct.Client = httpClient
-
 	apiClient, err := api.NewClient(api.Config{
 		Address:      cfg.Address,
 		RoundTripper: transport,
@@ -115,20 +96,22 @@ func NewStorageQueryable(cfg StorageQueryableConfig, tripperware querymiddleware
 	}
 
 	return &storageQueryable{
-		client: remoteReadClient,
-		api:    apiClient,
+		client:     NewStreamClient(cfg.ClientName, readURL, httpClient),
+		api:        apiClient,
+		httpClient: httpClient,
+		endpoint:   cfg.Address,
 	}, nil
 }
 
-var _ storage.Queryable = &storageQueryable{}
-
 type storageQueryable struct {
-	client remote.ReadClient
-	api    api.Client
+	client     Client
+	api        api.Client
+	httpClient *http.Client
+	endpoint   string
 }
 
-func (q *storageQueryable) Querier(ctx context.Context, mint, maxt int64) (storage.Querier, error) {
-	return &storageQuerier{ctx, mint, maxt, q.client, q.api}, nil
+func (q *storageQueryable) Querier(ctx context.Context, mint, maxt int64) (remotereadstorage.Querier, error) {
+	return &storageQuerier{ctx, mint, maxt, q.client, q.api, q.httpClient, q.endpoint}, nil
 }
 
 var _ storage.Querier = &storageQuerier{}
@@ -137,23 +120,22 @@ type storageQuerier struct {
 	ctx        context.Context
 	mint, maxt int64
 
-	client remote.ReadClient
-	api    api.Client
+	client     Client
+	api        api.Client
+	httpClient *http.Client
+	endpoint   string
 }
 
 func (q *storageQuerier) Select(sortSeries bool, hints *storage.SelectHints, matchers ...*labels.Matcher) (set storage.SeriesSet) {
-	var timeseries, samples int
 	ctx := q.ctx
 	if parentSpan := opentracing.SpanFromContext(q.ctx); parentSpan != nil {
 		var span opentracing.Span
 		span, ctx = opentracing.StartSpanFromContextWithTracer(q.ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.Select")
 		defer span.Finish()
-		span.LogKV("mint", q.mint, "maxt", q.maxt, "matchers", matchersString(matchers), "sortSeries", sortSeries)
+		span.LogKV("mint", q.mint, "maxt", q.maxt, "matchers", MatchersString(matchers), "sortSeries", sortSeries)
 		defer func() {
 			if set.Err() != nil {
 				span.LogKV("err", set.Err())
-			} else {
-				span.LogKV("timeseries_len", timeseries, "samples_len", samples)
 			}
 		}()
 	}
@@ -172,13 +154,7 @@ func (q *storageQuerier) Select(sortSeries bool, hints *storage.SelectHints, mat
 		return storage.ErrSeriesSet(fmt.Errorf("can't perform remote read: %w", err))
 	}
 
-	// Gather some stats for the span.
-	timeseries = len(res.Timeseries)
-	for _, ts := range res.Timeseries {
-		samples += len(ts.Samples)
-	}
-
-	return fromQueryResult(sortSeries, res)
+	return res
 }
 
 func (q *storageQuerier) LabelValues(label string, matchers ...*labels.Matcher) ([]string, storage.Warnings, error) {
@@ -187,7 +163,7 @@ func (q *storageQuerier) LabelValues(label string, matchers ...*labels.Matcher) 
 		var span opentracing.Span
 		span, ctx = opentracing.StartSpanFromContextWithTracer(q.ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.LabelValues")
 		defer span.Finish()
-		span.LogKV("mint", q.mint, "maxt", q.maxt, "name", label, "matchers", matchersString(matchers))
+		span.LogKV("mint", q.mint, "maxt", q.maxt, "name", label, "matchers", MatchersString(matchers))
 	}
 
 	u := q.api.URL(endpointLabelValues, map[string]string{"name": label})
@@ -208,7 +184,7 @@ func (q *storageQuerier) LabelNames(matchers ...*labels.Matcher) ([]string, stor
 		var span opentracing.Span
 		span, ctx = opentracing.StartSpanFromContextWithTracer(q.ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.LabelNames")
 		defer span.Finish()
-		span.LogKV("mint", q.mint, "maxt", q.maxt, "matchers", matchersString(matchers))
+		span.LogKV("mint", q.mint, "maxt", q.maxt, "matchers", MatchersString(matchers))
 	}
 
 	u := q.api.URL(endpointLabels, nil)
@@ -258,6 +234,73 @@ func (q *storageQuerier) Close() error {
 	return nil
 }
 
+func (q *storageQuerier) Series(matchers []string) ([]map[string]string, error) {
+	ctx := q.ctx
+	if parentSpan := opentracing.SpanFromContext(q.ctx); parentSpan != nil {
+		var span opentracing.Span
+		span, ctx = opentracing.StartSpanFromContextWithTracer(q.ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.Series")
+		defer span.Finish()
+		span.LogKV("matchers", matchers)
+	}
+
+	data := url.Values{}
+	for _, m := range matchers {
+		data.Add("match[]", m)
+	}
+	if q.mint >= 0 {
+		data.Set("start", strconv.FormatInt(time.UnixMilli(q.mint).Unix(), 10)) //nolint:gomnd
+	}
+	if q.maxt >= 0 {
+		data.Set("end", strconv.FormatInt(time.UnixMilli(q.maxt).Unix(), 10)) //nolint:gomnd
+	}
+
+	u, err := url.Parse(q.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	u.Path = path.Join(u.Path, endpointSeries)
+
+	// User POST method and Content-Type: application/x-www-form-urlencoded header so we can specify series selectors
+	// that may breach server-side URL character limits.
+	req, err := http.NewRequest("POST", u.String(), strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := q.httpClient.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode/100 != HTTPSuccessStatusPrefix {
+		// Make an attempt at getting an error message.
+		body, _ := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+
+		return nil, fmt.Errorf("remote server %s returned http status %s: %s", u.String(), resp.Status, string(body))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var seriesResponse struct {
+		Data []map[string]string
+	}
+	err = json.Unmarshal(body, &seriesResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return seriesResponse.Data, nil
+}
+
 func formatTime(t int64) string {
 	const (
 		millisPerSecond = int64(time.Second / time.Millisecond)
@@ -266,53 +309,17 @@ func formatTime(t int64) string {
 	return strconv.FormatFloat(float64(t)/float64(millisPerSecond), 'f', -1, bitSize)
 }
 
-// fromQueryResult is copied from remote.FromQueryResult and it has the `validateLabelsAndMetricName` call removed
-// because that's not a storage.Querier's responsibility (and actually Graphite needs this to provide invalid labels)
-func fromQueryResult(sortSeries bool, res *prompb.QueryResult) storage.SeriesSet {
-	series := make([]storage.Series, 0, len(res.Timeseries))
-	for _, ts := range res.Timeseries {
-		lbls := labelsutil.LabelProtosToLabels(ts.Labels)
-		series = append(series, cortexseries.NewConcreteSeries(lbls, sampleProtosToSamples(ts.Samples), nil))
-	}
-
-	if sortSeries {
-		sort.Sort(byLabel(series))
-	}
-	return cortexseries.NewConcreteSeriesSet(series)
-}
-
-func sampleProtosToSamples(in []prompb.Sample) []model.SamplePair {
-	if len(in) == 0 {
-		return nil
-	}
-
-	out := make([]model.SamplePair, len(in))
-	for i := range in {
-		out[i] = model.SamplePair{
-			Timestamp: model.Time(in[i].Timestamp),
-			Value:     model.SampleValue(in[i].Value),
-		}
-	}
-	return out
-}
-
-type byLabel []storage.Series
-
-func (a byLabel) Len() int           { return len(a) }
-func (a byLabel) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byLabel) Less(i, j int) bool { return labels.Compare(a[i].Labels(), a[j].Labels()) < 0 }
-
 //go:generate mockery --output remotereadmock --outpkg remotereadmock --case underscore --name StorageQueryableInterface
 type StorageQueryableInterface interface {
-	storage.Queryable
+	remotereadstorage.Queryable
 }
 
 //go:generate mockery --output remotereadmock --outpkg remotereadmock --case underscore --name StorageQuerierInterface
 type StorageQuerierInterface interface {
-	storage.Querier
+	remotereadstorage.Querier
 }
 
-func matchersString(matchers []*labels.Matcher) string {
+func MatchersString(matchers []*labels.Matcher) string {
 	if len(matchers) == 0 {
 		return ""
 	}

@@ -8,9 +8,7 @@ import (
 	"github.com/grafana/mimir-proxies/pkg/remoteread/remotereadmock"
 
 	"github.com/prometheus/prometheus/model/labels"
-
 	"github.com/prometheus/prometheus/storage"
-
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
