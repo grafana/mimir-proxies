@@ -6,22 +6,22 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 
+	"github.com/gorilla/mux"
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
 	"github.com/grafana/mimir/pkg/scheduler/queue"
-
-	"github.com/prometheus/prometheus/storage"
-	"github.com/prometheus/prometheus/tsdb/chunkenc"
-
-	"github.com/gorilla/mux"
 	"github.com/prometheus/prometheus/config"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/promql"
+	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/storage/remote"
+	"github.com/prometheus/prometheus/tsdb/chunkenc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/weaveworks/common/user"
@@ -361,4 +361,89 @@ func TestStorageQueryable_DecoratedRoundtripper(t *testing.T) {
 		set := querier.Select(true, nil, labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
 		require.NoError(t, set.Err())
 	})
+}
+
+func TestStorageQueryable_Series(t *testing.T) {
+	testCases := []struct {
+		name             string
+		mint             int64
+		maxt             int64
+		labelMatchers    []string
+		expectedPostForm url.Values
+	}{
+		{
+			name:          "no start/end ts",
+			mint:          -1,
+			maxt:          -1,
+			labelMatchers: []string{"graphite_untagged", "graphite_tagged"},
+			expectedPostForm: map[string][]string{
+				"match[]": {"graphite_untagged", "graphite_tagged"},
+			},
+		},
+		{
+			name:          "start ts",
+			mint:          5000,
+			maxt:          -1,
+			labelMatchers: []string{"graphite_untagged", "graphite_tagged"},
+			expectedPostForm: map[string][]string{
+				"match[]": {"graphite_untagged", "graphite_tagged"},
+				"start":   {strconv.Itoa(5)},
+			},
+		},
+		{
+			name:          "end ts",
+			mint:          -1,
+			maxt:          5000,
+			labelMatchers: []string{"graphite_untagged", "graphite_tagged"},
+			expectedPostForm: map[string][]string{
+				"match[]": {"graphite_untagged", "graphite_tagged"},
+				"end":     {strconv.Itoa(5)},
+			},
+		},
+		{
+			name:          "start/end ts",
+			mint:          5000,
+			maxt:          5000,
+			labelMatchers: []string{"graphite_untagged", "graphite_tagged"},
+			expectedPostForm: map[string][]string{
+				"match[]": {"graphite_untagged", "graphite_tagged"},
+				"start":   {strconv.Itoa(5)},
+				"end":     {strconv.Itoa(5)},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			router := mux.NewRouter()
+			router.Handle("/path/api/v1/series", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				require.Equal(t, "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
+				require.NoError(t, req.ParseForm())
+				require.Equal(t, tc.expectedPostForm, req.PostForm)
+
+				// We're not testing for the response here so we just write back some minimal valid JSON.
+				_, err := w.Write([]byte("{}"))
+				require.NoError(t, err)
+			}))
+			srv := httptest.NewServer(router)
+			defer srv.Close()
+
+			queryable, err := NewStorageQueryable(StorageQueryableConfig{
+				Address:      srv.URL + "/path",
+				Timeout:      time.Second,
+				KeepAlive:    time.Second,
+				MaxIdleConns: 10,
+				MaxConns:     10,
+
+				ClientName: "test",
+			}, nil)
+			require.NoError(t, err)
+
+			ctx := user.InjectOrgID(context.Background(), "42")
+
+			q, err := queryable.Querier(ctx, tc.mint, tc.maxt)
+			require.NoError(t, err)
+			_, err = q.Series(tc.labelMatchers)
+			require.NoError(t, err)
+		})
+	}
 }

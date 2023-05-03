@@ -36,13 +36,14 @@ func (c *Config) RegisterFlags(flags *flag.FlagSet) {
 // RegisterFlagsWithPrefix registers flags, adding the provided prefix if
 // needed. If the prefix is not blank and doesn't end with '.', a '.' is
 // appended to it.
+//
 //nolint:gomnd
 func (c *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	if prefix != "" && !strings.HasSuffix(prefix, ".") {
 		prefix += "."
 	}
 	flags.StringVar(&c.Endpoint, prefix+"query-endpoint", "", "URL for queries from upstream Prometheus API.")
-	flags.DurationVar(&c.Timeout, prefix+"query-timeout", 30*time.Second, "Timeout for queries to upstream Prometheus API.")
+	flags.DurationVar(&c.Timeout, prefix+"query-timeout", 60*time.Second, "Timeout for queries to upstream Prometheus API.")
 	flags.DurationVar(&c.KeepAlive, prefix+"query-keep-alive", 30*time.Second, "KeepAlive for queries to upstream Prometheus API.")
 	flags.IntVar(&c.MaxIdleConns, prefix+"query-max-idle-conns", 10, "Max idle conns for queries to upstream Prometheus API.")
 	flags.IntVar(&c.MaxConns, prefix+"query-max-conns", 100, "Max conns per host for queries to upstream Prometheus API.")

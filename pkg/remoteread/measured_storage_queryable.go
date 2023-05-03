@@ -5,21 +5,22 @@ import (
 	"time"
 
 	"github.com/prometheus/prometheus/model/labels"
-
 	"github.com/prometheus/prometheus/storage"
+
+	remotereadstorage "github.com/grafana/mimir-proxies/pkg/remoteread/storage"
 )
 
-func NewMeasuredStorageQueryable(q storage.Queryable, rec Recorder, timeNow func() time.Time) storage.Queryable {
+func NewMeasuredStorageQueryable(q remotereadstorage.Queryable, rec Recorder, timeNow func() time.Time) remotereadstorage.Queryable {
 	return &measuredStorageQueryable{q, rec, timeNow}
 }
 
 type measuredStorageQueryable struct {
-	queryable storage.Queryable
+	queryable remotereadstorage.Queryable
 	rec       Recorder
 	timeNow   func() time.Time
 }
 
-func (m *measuredStorageQueryable) Querier(ctx context.Context, mint, maxt int64) (storage.Querier, error) {
+func (m *measuredStorageQueryable) Querier(ctx context.Context, mint, maxt int64) (remotereadstorage.Querier, error) {
 	q, err := m.queryable.Querier(ctx, mint, maxt)
 	if err != nil {
 		return nil, err
@@ -29,7 +30,7 @@ func (m *measuredStorageQueryable) Querier(ctx context.Context, mint, maxt int64
 
 type measuredStorageQuerier struct {
 	ctx     context.Context
-	querier storage.Querier
+	querier remotereadstorage.Querier
 	rec     Recorder
 	timeNow func() time.Time
 }
@@ -53,6 +54,13 @@ func (m *measuredStorageQuerier) LabelNames(matchers ...*labels.Matcher) (_ []st
 		m.rec.measure("StorageQuerier.LabelNames", m.timeNow().Sub(t0), err)
 	}(m.timeNow())
 	return m.querier.LabelNames(matchers...)
+}
+
+func (m *measuredStorageQuerier) Series(matchers []string) (_ []map[string]string, err error) {
+	defer func(t0 time.Time) {
+		m.rec.measure("StorageQuerier.Series", m.timeNow().Sub(t0), err)
+	}(m.timeNow())
+	return m.querier.Series(matchers)
 }
 
 func (m *measuredStorageQuerier) Close() error {
