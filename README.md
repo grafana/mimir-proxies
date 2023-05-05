@@ -31,11 +31,13 @@ all of the commands.
 1. Increment the version number in VERSION.
 2. Add a heading to CHANGELOG.md to describe the major changes.
 3. Create a release branch: `git checkout -b release-$(cat VERSION)`
-4. run `./scripts/release/tag-release.sh` to sign and tag the branch.
-5. run `./scripts/release/create-draft-release.sh`.
-6. Go to the link printed at the end of the build and upload, and check that the
+4. Commit changes.
+5. run `./scripts/release/tag-release.sh` to sign and tag the branch.
+6. run `./scripts/release/create-draft-release.sh`.
+7. Go to the link printed at the end of the build and upload, and check that the
    release makes sense.
-7. Either fix it, or click Edit and Publish the release.
+8. Either fix it, or click Edit and Publish the release.
+9. Merge the release PR into main
 
 If you run into problems with the tagged release, you can delete it. You'll need
 to do that both locally and remotely:
