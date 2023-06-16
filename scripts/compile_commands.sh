@@ -15,8 +15,9 @@ GIT_COMMIT="${DRONE_COMMIT:-$(git rev-list -1 HEAD)}"
 COMMIT_UNIX_TIMESTAMP="$(git show -s --format=%ct "${GIT_COMMIT}")"
 # DOCKER_TAG="$(bash scripts/docker-tag.sh)"
 DOCKER_TAG="TODO"
+VERSION=$(cat CHANGELOG.md | grep "^## [0-9]\.[0-9]\.[0-9]" |head -n 1 | cut -d\  -f 2-)
 
-for cmd in datadog-proxy-writes graphite-proxy-writes
+for cmd in datadog-proxy-writes graphite-proxy-writes mimir-whisper-converter
 do
     go build \
     -tags netgo \
@@ -24,6 +25,7 @@ do
     -ldflags "\
         -w \
         -extldflags '-static' \
+        -X 'main.version=$VERSION' \
         -X 'github.com/grafana/mimir-proxies/pkg/appcommon.CommitUnixTimestamp=${COMMIT_UNIX_TIMESTAMP}' \
         -X 'github.com/grafana/mimir-proxies/pkg/appcommon.DockerTag=${DOCKER_TAG}' \
         " \
