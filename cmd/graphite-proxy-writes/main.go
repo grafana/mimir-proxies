@@ -21,6 +21,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// This value will be overridden during the build process using -ldflags.
+var version = "development"
+
 func Run() (err error) {
 	var (
 		appConfig    appcommon.Config
@@ -32,7 +35,13 @@ func Run() (err error) {
 		&appConfig,
 		&writerConfig,
 	)
+	versionFlag := flag.Bool("version", false, "Display the version of the binary")
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Fprintf(os.Stdout, "%s\n", version)
+		os.Exit(0)
+	}
 
 	if appConfig.ServiceName == "" {
 		appConfig.ServiceName = "graphite-proxy-writes"

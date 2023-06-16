@@ -28,6 +28,9 @@ const (
 	PASS2     = "pass2"
 )
 
+// This value will be overridden during the build process using -ldflags.
+var version = "development"
+
 var (
 	namePrefix = flag.String(
 		"name-prefix",
@@ -90,6 +93,7 @@ var (
 		"An optional comma-separated list of extra label name to label value to be applied to all metrics during conversion. This can be useful if you want to mark all metrics as coming from a specific archive, for example. This is applied during the second pass and has no effect on the first pass conversion.",
 	)
 
+	versionFlag = flag.Bool("version", false, "Display the version of the binary")
 	verboseFlag = flag.Bool("verbose", false, "If true, outputs info logging")
 	debugFlag   = flag.Bool("debug", false, "If true, outputs debug logging")
 	quietFlag   = flag.Bool("quiet", false, "If true, suppresses logging")
@@ -154,6 +158,11 @@ Example Usage:
 
 	}
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Fprintf(os.Stdout, "%s\n", version)
+		os.Exit(0)
+	}
 
 	if len(flag.Args()) != 1 {
 		fmt.Fprintf(os.Stderr, "ERROR: Need exactly one command (%s)\n", flag.Args())
