@@ -115,7 +115,7 @@ func getContextWithOpenTelemetry(t *testing.T) (context.Context, func()) {
 func getContextWithOpenTelemetryNoop(t *testing.T) (context.Context, func()) {
 	ctx, sp := otel.Tracer("test").Start(context.Background(), "test")
 
-	// sanity check
+	// sanity check IsValid() return value
 	require.False(t, sp.SpanContext().TraceID().IsValid())
 
 	return ctx, func() {
