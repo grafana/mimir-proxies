@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.1](https://github.com/grafana/mimir-proxies/compare/mimir-proxies-v1.0.0...mimir-proxies-v1.0.1) (2023-06-23)
+
+
+### Bug Fixes
+
+* actually add release-please-config ([#30](https://github.com/grafana/mimir-proxies/issues/30)) ([9f8f881](https://github.com/grafana/mimir-proxies/commit/9f8f88136925aed525a31ffd658531277ae8ec57))
+* add release-please manifest ([#31](https://github.com/grafana/mimir-proxies/issues/31)) ([d4a563f](https://github.com/grafana/mimir-proxies/commit/d4a563fef54f577e69bb819dbdba7bfaaa68fa70))
+* manifest format ([6963431](https://github.com/grafana/mimir-proxies/commit/69634313193cff433887713d7a88b52b64fc6fec))
+* remove stray comma ([9bbdaeb](https://github.com/grafana/mimir-proxies/commit/9bbdaebe416c3aa51d62b047c4bb793f53e72237))
+* try to do building inside release-please ([#29](https://github.com/grafana/mimir-proxies/issues/29)) ([b8a50db](https://github.com/grafana/mimir-proxies/commit/b8a50db44d27bf57c2f8d9e44bd5c559d63981c2))
+* trying to get release-please to see my packages ([#32](https://github.com/grafana/mimir-proxies/issues/32)) ([b8c258c](https://github.com/grafana/mimir-proxies/commit/b8c258c9dd6bc548064a67a6eb5200812242a6de))
+
 ## [1.0.0] (2023-06-23)
 
 
