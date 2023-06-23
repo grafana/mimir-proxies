@@ -1,29 +1,13 @@
 {
-  "draft": true,
   "bootstrap-sha": "14db7122f337f1a9248d9cafcdb38b7bb4932b41",
   "packages": {
-    "cmd/mimir-whisper-converter": {
+    ".": {
       "release-type": "go",
-      "package-name": "cmd/mimir-whisper-converter",
+      "package-name": "mimir-proxies",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "versioning": "default",
-      "extra-files": []
-    },
-    "cmd/graphite-proxy-writes": {
-      "release-type": "go",
-      "package-name": "cmd/graphite-proxy-writes",
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true,
-      "versioning": "default",
-      "extra-files": []
-    },
-    "cmd/datadog-proxy-writes": {
-      "release-type": "go",
-      "package-name": "cmd/datadog-proxy-writes",
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true,
-      "versioning": "default",
+      "draft": true,
       "extra-files": []
     }
   },
