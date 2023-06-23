@@ -1,6 +1,6 @@
 module github.com/grafana/mimir-proxies
 
-go 1.20
+go 1.19
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20221031212613-62deef7fc822
@@ -25,7 +25,7 @@ require (
 	github.com/prometheus/common v0.42.0
 	github.com/prometheus/prometheus v1.8.2-0.20220620125440-d7e7b8e04b5e
 	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	github.com/weaveworks/common v0.0.0-20230119144549-0aaa5abd1e63
@@ -55,7 +55,7 @@ require (
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/go-logr/logr v1.2.3 // indirect
+	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/analysis v0.21.4 // indirect
 	github.com/go-openapi/errors v0.20.3 // indirect
@@ -129,7 +129,10 @@ require (
 	go.opentelemetry.io/collector/semconv v0.73.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
+	go.opentelemetry.io/otel/bridge/opentracing v1.14.0 // indirect
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.14.0 // indirect
 	go.opentelemetry.io/otel/metric v0.37.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/goleak v1.2.1 // indirect
