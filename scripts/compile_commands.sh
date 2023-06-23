@@ -15,7 +15,7 @@ GIT_COMMIT="${DRONE_COMMIT:-$(git rev-list -1 HEAD)}"
 COMMIT_UNIX_TIMESTAMP="$(git show -s --format=%ct "${GIT_COMMIT}")"
 # DOCKER_TAG="$(bash scripts/docker-tag.sh)"
 DOCKER_TAG="TODO"
-VERSION=$(cat CHANGELOG.md | grep "^## [0-9]\.[0-9]\.[0-9]" |head -n 1 | cut -d\  -f 2-)
+VERSION=$(cat CHANGELOG.md | grep "^## \[" |head -n 1 | cut -d\[ -f 2- | cut -d\] -f 1)
 
 for cmd in datadog-proxy-writes graphite-proxy-writes mimir-whisper-converter
 do
