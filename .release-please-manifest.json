@@ -1,0 +1,5 @@
+{
+  "cmd/mimir-whisper-converter": "1.0.0",
+  "cmd/graphite-proxy-writes": "1.0.0",
+  "cmd/datadog-proxy-writes": "1.0.0"
+}
