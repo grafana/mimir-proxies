@@ -1,5 +1,3 @@
-# Note: This currenlt only builds mimir-whisper-converter.
-# If we want to build more binaries later, that would be fine.
 builds:
   - id: "mimir-whisper-converter"
     main: ./cmd/mimir-whisper-converter
@@ -10,12 +8,25 @@ builds:
     goarch:
       - amd64
       - arm64
+  - id: "datadog-proxy-writes"
+    main: ./cmd/datadog-proxy-writes
+    binary: datadog-proxy-writes
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: "graphite-proxy-writes"
+    main: ./cmd/graphite-proxy-writes
+    binary: graphite-proxy-writes
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      386: i386
-      amd64: x86_64
-    files:
+  - files:
       - none*
-    name_template: "mimir-whisper-converter_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "mimir-proxies_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
