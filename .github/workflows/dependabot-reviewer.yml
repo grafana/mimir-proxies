@@ -1,0 +1,11 @@
+name: Dependabot reviewer
+on: pull_request_target
+permissions:
+  pull-requests: write
+  contents: write
+jobs:
+  call-workflow-passing-data:
+    uses: grafana/transmog/.github/workflows/dependabot-automerge.yml@master
+    with:
+      packages-minor-autoupdate: '["github.com/felixge/httpsnoop","github.com/go-graphite/go-whisper","github.com/go-kit/log","github.com/gogo/protobuf","github.com/golang/protobuf","github.com/golang/snappy","github.com/gorilla/mux","github.com/grafana/dskit","github.com/grafana/metrictank","github.com/grafana/mimir","github.com/kisielk/whisper-go","github.com/mwitkow/go-conntrack","github.com/oklog/run","github.com/oklog/ulid","github.com/opentracing-contrib/go-stdlib","github.com/opentracing/opentracing-go","github.com/pkg/errors","github.com/prometheus/client_golang","github.com/prometheus/common","github.com/serialx/hashring","github.com/stretchr/testify","github.com/uber/jaeger-client-go","github.com/uber/jaeger-lib","github.com/weaveworks/common","golang.org/x/net","google.golang.org/grpc"]'
+    secrets: inherit
