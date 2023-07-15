@@ -22,11 +22,11 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 		reader := io.LimitReader(r.Body, int64(l.maxRequestBodySize)+1)
 		body, err := io.ReadAll(reader)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to read request body: %v", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("failed to read request body: %v", err), http.StatusBadRequest)
 			return
 		}
 		if int64(len(body)) > l.maxRequestBodySize {
-			http.Error(w, fmt.Sprintf("trying to send message larger than max (%d vs %d)", len(body), l.maxRequestBodySize), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("trying to send message larger than max (%d vs %d)", len(body), l.maxRequestBodySize), http.StatusBadRequest)
 			return
 		}
 
