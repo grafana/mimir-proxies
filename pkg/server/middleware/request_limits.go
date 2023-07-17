@@ -22,7 +22,7 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 		reader := io.LimitReader(r.Body, int64(l.maxRequestBodySize)+1)
 		body, err := io.ReadAll(reader)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to read request body: %v", err), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("failed to read request body: %v", err), http.StatusInternalServerError)
 			return
 		}
 		if int64(len(body)) > l.maxRequestBodySize {

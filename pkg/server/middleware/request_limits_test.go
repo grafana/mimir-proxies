@@ -35,7 +35,7 @@ func TestRequestLimitsMiddleware(t *testing.T) {
 			expectedStatus:     http.StatusOK,
 		},
 		{
-			name:               "requests with body size greater than max should fail with 400",
+			name:               "requests with body size greater than max should fail with 413",
 			maxRequestBodySize: 0.5 * mb,
 			inputBody:          []byte(strings.Repeat("a", 1*mb)),
 			expectedStatus:     http.StatusRequestEntityTooLarge,
