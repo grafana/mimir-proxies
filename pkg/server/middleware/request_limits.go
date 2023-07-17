@@ -26,7 +26,7 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 			return
 		}
 		if int64(len(body)) > l.maxRequestBodySize {
-			http.Error(w, fmt.Sprintf("trying to send message larger than max (%d vs %d)", len(body), l.maxRequestBodySize), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("trying to send message larger than max (%d vs %d)", len(body), l.maxRequestBodySize), http.StatusRequestEntityTooLarge)
 			return
 		}
 
