@@ -18,6 +18,7 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
+          release-type: go
           command: manifest
           token: ${{secrets.GITHUB_TOKEN}}
           default-branch: main
@@ -26,35 +27,11 @@ jobs:
       release_tag_name: ${{ steps.release.outputs.tag_name }}
       release_title: >
         ${{ format('mimir-proxies: v{0}.{1}.{2}', steps.release.outputs.major, steps.release.outputs.minor, steps.release.outputs.patch) }}
-  artifacts:
+  call-workflow-build-artifacts:
     needs: release-please
-    runs-on: ubuntu-latest
     if: ${{ needs.release-please.outputs.releases_created }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.DEFAULT_GO_VERSION }}
-
-      - name: Build Archives
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --snapshot --clean
-
-      - name: Bundle release assets
-        uses: softprops/action-gh-release@v1
-        with:
-          draft: true
-          append_body: true
-          tag_name: ${{ needs.release-please.outputs.release_tag_name }}
-          name: ${{ needs.release-please.outputs.release_title }}
-          files: |
-            README.md
-            CHANGELOG.md
-            LICENSE
-            ./dist/*.tar.gz
+    uses: ./.github/workflows/build-artifacts.yml
+    with:
+      release_tag_name:  ${{ needs.release-please.outputs.release_tag_name }}
+      release_title:  ${{ needs.release-please.outputs.release_title }}
+    secrets: inherit
