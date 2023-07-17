@@ -1,0 +1,55 @@
+on:
+  workflow_call:
+    inputs:
+      release_tag_name:
+        required: true
+        type: string
+      release_title:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  repository-projects: read
+
+env:
+  DEFAULT_GO_VERSION: 1.20.5
+
+name: Build Artifacts
+jobs:
+  build-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        # Fetch all history for all tags and branches.
+        # Needed for the releaser to know what version to tag.
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.DEFAULT_GO_VERSION }}
+
+      - name: Build Archives
+        uses: goreleaser/goreleaser-action@v4
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --snapshot --clean
+
+      - name: Bundle release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          append_body: true
+          tag_name: ${{ inputs.release_tag_name }}
+          name: ${{ inputs.release_title }}
+          files: |
+            README.md
+            CHANGELOG.md
+            ./dist/*.tar.gz
