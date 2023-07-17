@@ -6,6 +6,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  repository-projects: read
 
 env:
   DEFAULT_GO_VERSION: 1.20.5
