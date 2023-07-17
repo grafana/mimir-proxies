@@ -133,7 +133,7 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string, tracer open
 		authMiddleware = middleware.HTTPFakeAuth{}
 	}
 
-	requestLimitsMiddleware := middleware.NewRequestLimitsMiddleware(cfg.ServerConfig.HTTPMaxRequestSizeLimit)
+	requestLimitsMiddleware := middleware.NewRequestLimitsMiddleware(cfg.ServerConfig.HTTPMaxRequestSizeLimit, logger)
 
 	// Middlewares will be wrapped in order
 	middlewares := []middleware.Interface{
