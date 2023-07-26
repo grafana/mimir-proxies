@@ -10,7 +10,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/grafana/mimir/pkg/util/spanlogger"
 )
@@ -21,13 +20,11 @@ const (
 
 type RequestLimits struct {
 	maxRequestBodySize int64
-	logger             log.Logger
 }
 
-func NewRequestLimitsMiddleware(maxRequestBodySize int64, logger log.Logger) *RequestLimits {
+func NewRequestLimitsMiddleware(maxRequestBodySize int64) *RequestLimits {
 	return &RequestLimits{
 		maxRequestBodySize: maxRequestBodySize,
-		logger:             logger,
 	}
 }
 
@@ -39,8 +36,7 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 		reader := io.LimitReader(r.Body, int64(l.maxRequestBodySize)+1)
 		body, err := io.ReadAll(reader)
 		if err != nil {
-			level.Warn(log).Log("msg", "failed to read request body", "err", err)
-			_ = level.Warn(l.logger).Log("msg", "middleware.RequestLimits.Wrap failed to read request body", "err", err)
+			_ = level.Warn(log).Log("msg", "failed to read request body", "err", err)
 
 			switch {
 			case isNetworkError(err):
@@ -56,8 +52,7 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 		}
 		if int64(len(body)) > l.maxRequestBodySize {
 			msg := fmt.Sprintf("trying to send message larger than max (%d vs %d)", len(body), l.maxRequestBodySize)
-			level.Warn(log).Log("msg", msg)
-			_ = level.Warn(l.logger).Log("msg", "middleware.RequestLimits.Wrap: "+msg)
+			_ = level.Warn(log).Log("msg", msg)
 			http.Error(w, msg, http.StatusRequestEntityTooLarge)
 			return
 		}
@@ -68,6 +63,7 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 	})
 }
 
+// isNetworkError determines if an error is caused by a network timeout
 func isNetworkError(err error) bool {
 	if err == nil {
 		return false

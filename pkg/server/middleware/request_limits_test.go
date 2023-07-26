@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-kit/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -46,7 +45,7 @@ func TestRequestLimitsMiddleware(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			middleware := NewRequestLimitsMiddleware(tc.maxRequestBodySize, log.NewNopLogger())
+			middleware := NewRequestLimitsMiddleware(tc.maxRequestBodySize)
 			handler := middleware.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 			}))
@@ -112,7 +111,7 @@ func TestRequestLimitsMiddlewareReadError(t *testing.T) {
 			expectedStatus: http.StatusInternalServerError,
 		},
 	} {
-		middleware := NewRequestLimitsMiddleware(1*mb, log.NewNopLogger())
+		middleware := NewRequestLimitsMiddleware(1 * mb)
 		handler := middleware.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
