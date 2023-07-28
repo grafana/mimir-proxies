@@ -2,12 +2,20 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+
+	"github.com/pkg/errors"
 
 	"github.com/go-kit/log/level"
 	"github.com/grafana/mimir/pkg/util/spanlogger"
+)
+
+const (
+	StatusClientClosedRequest = 499
 )
 
 type RequestLimits struct {
@@ -28,13 +36,23 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 		reader := io.LimitReader(r.Body, int64(l.maxRequestBodySize)+1)
 		body, err := io.ReadAll(reader)
 		if err != nil {
-			level.Warn(log).Log("msg", "failed to read request body", "err", err)
-			http.Error(w, fmt.Sprintf("failed to read request body: %v", err), http.StatusInternalServerError)
-			return
+			_ = level.Warn(log).Log("msg", "failed to read request body", "err", err)
+
+			switch {
+			case isNetworkError(err):
+				http.Error(w, fmt.Sprintf("failed to read request body: %v", err), http.StatusRequestTimeout)
+				return
+			case errors.Is(err, context.Canceled) || errors.Is(err, io.ErrUnexpectedEOF):
+				http.Error(w, fmt.Sprintf("failed to read request body: %v", err), StatusClientClosedRequest)
+				return
+			default:
+				http.Error(w, fmt.Sprintf("failed to read request body: %v", err), http.StatusInternalServerError)
+				return
+			}
 		}
 		if int64(len(body)) > l.maxRequestBodySize {
 			msg := fmt.Sprintf("trying to send message larger than max (%d vs %d)", len(body), l.maxRequestBodySize)
-			level.Warn(log).Log("msg", msg)
+			_ = level.Warn(log).Log("msg", msg)
 			http.Error(w, msg, http.StatusRequestEntityTooLarge)
 			return
 		}
@@ -43,4 +61,14 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+// isNetworkError determines if an error is caused by a network timeout
+func isNetworkError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	netErr, ok := errors.Cause(err).(net.Error)
+	return ok && netErr.Timeout()
 }
