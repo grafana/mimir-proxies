@@ -141,8 +141,8 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string, tracer open
 		logMiddleware,
 	}
 
-	if (cfg.ServerConfig.HTTPMaxRequestSizeLimit > 0) {
-		requestLimitsMiddleware := middleware.NewRequestLimitsMiddleware(cfg.ServerConfig.HTTPMaxRequestSizeLimit)
+	if cfg.ServerConfig.HTTPMaxRequestSizeLimit > 0 {
+		requestLimitsMiddleware := middleware.NewRequestLimitsMiddleware(cfg.ServerConfig.HTTPMaxRequestSizeLimit, logger)
 		middlewares = append(middlewares, requestLimitsMiddleware)
 	}
 
