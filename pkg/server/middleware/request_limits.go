@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/go-kit/log"
 	"github.com/pkg/errors"
 
 	"github.com/go-kit/log/level"
@@ -20,17 +21,19 @@ const (
 
 type RequestLimits struct {
 	maxRequestBodySize int64
+	logger             log.Logger
 }
 
-func NewRequestLimitsMiddleware(maxRequestBodySize int64) *RequestLimits {
+func NewRequestLimitsMiddleware(maxRequestBodySize int64, logger log.Logger) *RequestLimits {
 	return &RequestLimits{
 		maxRequestBodySize: maxRequestBodySize,
+		logger:             logger,
 	}
 }
 
 func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log, _ := spanlogger.New(r.Context(), "middleware.RequestLimits.Wrap")
+		log, _ := spanlogger.NewWithLogger(r.Context(), l.logger, "middleware.RequestLimits.Wrap")
 		defer log.Span.Finish()
 
 		reader := io.LimitReader(r.Body, int64(l.maxRequestBodySize)+1)
