@@ -25,7 +25,7 @@ const (
 	mb                                          = 1024 * 1024
 	defaultServerGracefulShutdown time.Duration = 5 * time.Second
 	defaultHTTPReadTimeout        time.Duration = 30 * time.Second
-	defaultHTTPWriteimeout        time.Duration = 30 * time.Second
+	defaultHTTPWriteimeout        time.Duration = 35 * time.Second
 	defaultHTTPIdleimeout         time.Duration = 30 * time.Second
 	defaultHTTPRequestSizeLimit   int64         = 10 * mb
 
