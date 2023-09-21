@@ -25,8 +25,8 @@ const (
 	mb                                          = 1024 * 1024
 	defaultServerGracefulShutdown time.Duration = 5 * time.Second
 	defaultHTTPReadTimeout        time.Duration = 30 * time.Second
-	defaultHTTPWriteimeout        time.Duration = 35 * time.Second
-	defaultHTTPIdleimeout         time.Duration = 30 * time.Second
+	defaultHTTPWriteTimeout       time.Duration = 35 * time.Second
+	defaultHTTPIdleTimeout        time.Duration = 30 * time.Second
 	defaultHTTPRequestSizeLimit   int64         = 10 * mb
 
 	defaultListenPort = 8000
@@ -70,8 +70,8 @@ func (cfg *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	flags.IntVar(&cfg.HTTPConnLimit, prefix+"server.http-listen-conn-limit", 0, "Sets a limit to the amount of http connections, 0 means no limit")
 	flags.DurationVar(&cfg.ServerGracefulShutdownTimeout, prefix+"server.graceful-shutdown-timeout", defaultServerGracefulShutdown, "Graceful shutdown period")
 	flags.DurationVar(&cfg.HTTPServerReadTimeout, prefix+"server.http-server-read-timeout", defaultHTTPReadTimeout, "HTTP request read timeout")
-	flags.DurationVar(&cfg.HTTPServerWriteTimeout, prefix+"server.http-server-write-timeout", defaultHTTPWriteimeout, "HTTP request write timeout")
-	flags.DurationVar(&cfg.HTTPServerIdleTimeout, prefix+"server.http-server-idle-timeout", defaultHTTPIdleimeout, "HTTP request idle timeout")
+	flags.DurationVar(&cfg.HTTPServerWriteTimeout, prefix+"server.http-server-write-timeout", defaultHTTPWriteTimeout, "HTTP request write timeout")
+	flags.DurationVar(&cfg.HTTPServerIdleTimeout, prefix+"server.http-server-idle-timeout", defaultHTTPIdleTimeout, "HTTP request idle timeout")
 	flags.Int64Var(&cfg.HTTPMaxRequestSizeLimit, prefix+"server.http-max-req-size-limit", defaultHTTPRequestSizeLimit, "HTTP max request body size limit in bytes")
 	flags.StringVar(&cfg.PathPrefix, prefix+"server.path-prefix", "", "Base path to serve all API routes from (e.g. /v1/)")
 	flags.IntVar(&cfg.GRPCListenPort, prefix+"server.grpc-listen-port", defaultGrpcPort, "Sets listen address port for the http server")
