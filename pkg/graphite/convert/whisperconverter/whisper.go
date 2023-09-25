@@ -54,6 +54,7 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		return nil, fmt.Errorf("whisper file contains no archives for metric: %q", name)
 	}
 
+	// TODO We can probably get rid of this once we finalize changes
 	totalPoints := 0
 	for _, a := range w.GetArchives() {
 		totalPoints += int(a.Points)
@@ -63,15 +64,46 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 	allPoints := make([]pointWithPrecision, totalPoints)
 	pIdx := 0
 	// Dump one precision level at a time and write into the output slice.
+	// Its important to remember that the archive with index 0 (first archive)
+	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
+
+	// TODO (sort archives on seconds per point) then keep maxTs per archive and drop all points seen in the previous archive
+
 	for i, a := range w.GetArchives() {
 		archivePoints, err := w.DumpArchive(i)
 		if err != nil {
 			return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
 		}
-		for j, p := range archivePoints {
-			allPoints[pIdx+j] = pointWithPrecision{p, a.SecondsPerPoint}
+
+		var minArchiveTs, maxArchiveTs uint32
+		for _, p := range archivePoints { // Double pass to find maxTs, inefficient
+			// We want to track the max timestamp of the archive because we know
+			// it virtually represents now() for the archive and in prometheus
+			// block terms it would give us the max timestamp of the archive.
+			// Then the min timestamp of the archive would be maxTs - the archive
+			// retention.
+			if p.Timestamp > maxArchiveTs {
+				maxArchiveTs = p.Timestamp
+			}
 		}
-		pIdx += len(archivePoints)
+
+		if a.Retention() > maxArchiveTs {
+			minArchiveTs = 0
+		} else {
+			minArchiveTs = maxArchiveTs - a.Retention()
+		}
+
+		addedPoints := 0
+		for j, p := range archivePoints {
+			// If the point is older than minArchiveTs then we want to skip it.
+			if p.Timestamp < minArchiveTs {
+				continue
+			}
+			allPoints[pIdx+j] = pointWithPrecision{p, a.SecondsPerPoint}
+			addedPoints++
+		}
+		pIdx += addedPoints
+		// TODO sort allpoints by timestamp
 	}
 
 	// Points must be in time order.

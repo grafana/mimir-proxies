@@ -9,14 +9,15 @@ import (
 	"time"
 
 	"github.com/go-kit/log"
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
-	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
 	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/kisielk/whisper-go/whisper"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/tsdb"
 	"github.com/stretchr/testify/require"
+
+	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
+	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
 )
 
 func simpleArchiveInfo(points, secondsPerPoint int) whisper.ArchiveInfo {
