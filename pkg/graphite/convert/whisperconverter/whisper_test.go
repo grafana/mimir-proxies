@@ -85,36 +85,36 @@ func TestExtractWhisperPoints(t *testing.T) {
 					{
 						whisper.NewPoint(time.Unix(0, 0), 12),
 						whisper.NewPoint(time.Unix(0, 0), 12),
-						whisper.NewPoint(time.Unix(1000, 0), 12),
-						whisper.NewPoint(time.Unix(1001, 0), 42),
+						whisper.NewPoint(time.Unix(1054, 0), 12),
+						whisper.NewPoint(time.Unix(1055, 0), 42),
 						whisper.NewPoint(time.Unix(1060, 0), 2),
-						whisper.NewPoint(time.Unix(1002, 0), 27.5),
+						whisper.NewPoint(time.Unix(1056, 0), 27.5),
 					},
 					{
 						whisper.NewPoint(time.Unix(0, 0), 12),
-						whisper.NewPoint(time.Unix(1004, 0), 1),
+						whisper.NewPoint(time.Unix(1058, 0), 1),
 						whisper.NewPoint(time.Unix(1060, 0), 102),
 						whisper.NewPoint(time.Unix(1121, 0), 4),
 						whisper.NewPoint(time.Unix(0, 0), 0),
-						whisper.NewPoint(time.Unix(1001, 0), 5),
+						whisper.NewPoint(time.Unix(1055, 0), 5),
 					},
 				},
 			},
 			want: []whisper.Point{
 				{
-					Timestamp: 1000,
+					Timestamp: 1054,
 					Value:     12,
 				},
 				{
-					Timestamp: 1001,
+					Timestamp: 1055,
 					Value:     42,
 				},
 				{
-					Timestamp: 1002,
+					Timestamp: 1056,
 					Value:     27.5,
 				},
 				{
-					Timestamp: 1004,
+					Timestamp: 1058,
 					Value:     1,
 				},
 				{
@@ -138,18 +138,18 @@ func TestExtractWhisperPoints(t *testing.T) {
 				points: [][]whisper.Point{
 					{
 						whisper.NewPoint(time.Unix(2002, 0), 4),
-						whisper.NewPoint(time.Unix(1000, 0), 87),
-						whisper.NewPoint(time.Unix(1501, 0), 112),
+						whisper.NewPoint(time.Unix(2000, 0), 87),
+						whisper.NewPoint(time.Unix(2001, 0), 112),
 					},
 				},
 			},
 			want: []whisper.Point{
 				{
-					Timestamp: 1000,
+					Timestamp: 2000,
 					Value:     87,
 				},
 				{
-					Timestamp: 1501,
+					Timestamp: 2001,
 					Value:     112,
 				},
 				{

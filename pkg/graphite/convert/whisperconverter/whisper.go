@@ -62,13 +62,12 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 
 	// Preallocate space for all allPoints in one slice.
 	allPoints := make([]pointWithPrecision, totalPoints)
-	pIdx := 0
 	// Dump one precision level at a time and write into the output slice.
 	// Its important to remember that the archive with index 0 (first archive)
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
 
 	// TODO (sort archives on seconds per point) then keep maxTs per archive and drop all points seen in the previous archive
-
+	idxPoint := 0
 	for i, a := range w.GetArchives() {
 		archivePoints, err := w.DumpArchive(i)
 		if err != nil {
@@ -93,16 +92,14 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			minArchiveTs = maxArchiveTs - a.Retention()
 		}
 
-		addedPoints := 0
-		for j, p := range archivePoints {
+		for _, p := range archivePoints {
 			// If the point is older than minArchiveTs then we want to skip it.
 			if p.Timestamp < minArchiveTs {
 				continue
 			}
-			allPoints[pIdx+j] = pointWithPrecision{p, a.SecondsPerPoint}
-			addedPoints++
+			allPoints[idxPoint] = pointWithPrecision{p, a.SecondsPerPoint}
+			idxPoint++
 		}
-		pIdx += addedPoints
 		// TODO sort allpoints by timestamp
 	}
 
