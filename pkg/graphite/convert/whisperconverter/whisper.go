@@ -67,6 +67,7 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		}
 
 		var minArchiveTs, maxArchiveTs uint32
+		// calculate maxArchiveTs
 		for _, p := range archivePoints {
 			// We want to track the max timestamp of the archive because we know
 			// it virtually represents now() and we wont have newer points.
@@ -77,13 +78,20 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			}
 		}
 
-		minArchiveTs = maxArchiveTs - a.Retention()
+		// calculate minArchiveTs
+		if maxArchiveTs-a.Retention() > maxArchiveTs { // overflow, very big retention
+			minArchiveTs = 0
+		} else {
+			minArchiveTs = maxArchiveTs - a.Retention()
+		}
+
+		// For subsequent archives
 		if lastMinTs > 0 {
-			// if we are already in the second or subsequent archive, we want to skip
+			// if we are already in the second or subsequent archive and we had
+			// some points in the prior archives, we want to skip
 			// samples in the previous archives
 			maxArchiveTs = lastMinTs
 		}
-
 		lastMinTs = minArchiveTs
 
 		for _, p := range archivePoints {
