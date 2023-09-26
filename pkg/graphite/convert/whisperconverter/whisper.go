@@ -58,7 +58,7 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 	// Its important to remember that the archive with index 0 (first archive)
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
 	seenTs := map[uint32]struct{}{}
-	previousMaxTs := uint32(0)
+	lastMinTs := uint32(0)
 	var keptPoints []whisper.Point
 	for i, a := range w.GetArchives() {
 		archivePoints, err := w.DumpArchive(i)
@@ -77,13 +77,14 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			}
 		}
 
-		if previousMaxTs == 0 {
-			// this is archive 0
-			minArchiveTs = maxArchiveTs - a.Retention()
-		} else {
-			// this is archive 1+
-			minArchiveTs = previousMaxTs
+		minArchiveTs = maxArchiveTs - a.Retention()
+		if lastMinTs > 0 {
+			// if we are already in the second or subsequent archive, we want to skip
+			// samples in the previous archives
+			maxArchiveTs = lastMinTs
 		}
+
+		lastMinTs = minArchiveTs
 
 		for _, p := range archivePoints {
 			if p.Timestamp < minArchiveTs {

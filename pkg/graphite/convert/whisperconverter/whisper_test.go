@@ -134,7 +134,7 @@ func TestExtractWhisperPoints(t *testing.T) {
 			archive: &testArchive{
 				infos: []whisper.ArchiveInfo{
 					// This is what the test will define
-					// 1000     1010     1020     1030
+					// 1030     1020     1010     1000
 					//  [         ]
 					//  [                  ]
 					//  [                           ]
@@ -149,33 +149,33 @@ func TestExtractWhisperPoints(t *testing.T) {
 				},
 				points: [][]whisper.Point{
 					{
-						whisper.NewPoint(time.Unix(1000, 0), 0),
-						whisper.NewPoint(time.Unix(1001, 0), 1),
-						whisper.NewPoint(time.Unix(1002, 0), 2),
-						whisper.NewPoint(time.Unix(1003, 0), 3),
-						whisper.NewPoint(time.Unix(1004, 0), 4),
-						whisper.NewPoint(time.Unix(1005, 0), 5),
-						whisper.NewPoint(time.Unix(1006, 0), 6),
-						whisper.NewPoint(time.Unix(1007, 0), 7),
-						whisper.NewPoint(time.Unix(1008, 0), 8),
-						whisper.NewPoint(time.Unix(1009, 0), 9),
+						whisper.NewPoint(time.Unix(1021, 0), 21),
+						whisper.NewPoint(time.Unix(1022, 0), 22),
+						whisper.NewPoint(time.Unix(1023, 0), 23),
+						whisper.NewPoint(time.Unix(1024, 0), 24),
+						whisper.NewPoint(time.Unix(1025, 0), 25),
+						whisper.NewPoint(time.Unix(1026, 0), 26),
+						whisper.NewPoint(time.Unix(1027, 0), 27),
+						whisper.NewPoint(time.Unix(1028, 0), 28),
+						whisper.NewPoint(time.Unix(1029, 0), 29),
+						whisper.NewPoint(time.Unix(1030, 0), 30),
 					},
 					{
-						whisper.NewPoint(time.Unix(1000, 0), 0), // skipped
-						whisper.NewPoint(time.Unix(1003, 0), 3), // skipped
-						whisper.NewPoint(time.Unix(1006, 0), 6), // skipped
-						whisper.NewPoint(time.Unix(1009, 0), 9), // skipped
 						whisper.NewPoint(time.Unix(1012, 0), 12),
 						whisper.NewPoint(time.Unix(1015, 0), 15),
 						whisper.NewPoint(time.Unix(1018, 0), 18),
+						whisper.NewPoint(time.Unix(1021, 0), 21), // skipped
+						whisper.NewPoint(time.Unix(1024, 0), 24), // skipped
+						whisper.NewPoint(time.Unix(1027, 0), 27), // skipped
+						whisper.NewPoint(time.Unix(1030, 0), 30), // skipped
 					},
 					{
-						whisper.NewPoint(time.Unix(1000, 0), 0),  // skipped
-						whisper.NewPoint(time.Unix(1006, 0), 6),  // skipped
+						whisper.NewPoint(time.Unix(1000, 0), 0),
+						whisper.NewPoint(time.Unix(1006, 0), 6),
 						whisper.NewPoint(time.Unix(1012, 0), 12), // skipped
 						whisper.NewPoint(time.Unix(1018, 0), 18), // skipped
-						whisper.NewPoint(time.Unix(1024, 0), 24),
-						whisper.NewPoint(time.Unix(1030, 0), 30),
+						whisper.NewPoint(time.Unix(1024, 0), 24), // skipped
+						whisper.NewPoint(time.Unix(1030, 0), 30), // skipped
 					},
 				},
 			},
@@ -185,40 +185,8 @@ func TestExtractWhisperPoints(t *testing.T) {
 					Value:     0,
 				},
 				{
-					Timestamp: 1001,
-					Value:     1,
-				},
-				{
-					Timestamp: 1002,
-					Value:     2,
-				},
-				{
-					Timestamp: 1003,
-					Value:     3,
-				},
-				{
-					Timestamp: 1004,
-					Value:     4,
-				},
-				{
-					Timestamp: 1005,
-					Value:     5,
-				},
-				{
 					Timestamp: 1006,
 					Value:     6,
-				},
-				{
-					Timestamp: 1007,
-					Value:     7,
-				},
-				{
-					Timestamp: 1008,
-					Value:     8,
-				},
-				{
-					Timestamp: 1009,
-					Value:     9,
 				},
 				{
 					Timestamp: 1012,
@@ -233,8 +201,40 @@ func TestExtractWhisperPoints(t *testing.T) {
 					Value:     18,
 				},
 				{
+					Timestamp: 1021,
+					Value:     21,
+				},
+				{
+					Timestamp: 1022,
+					Value:     22,
+				},
+				{
+					Timestamp: 1023,
+					Value:     23,
+				},
+				{
 					Timestamp: 1024,
 					Value:     24,
+				},
+				{
+					Timestamp: 1025,
+					Value:     25,
+				},
+				{
+					Timestamp: 1026,
+					Value:     26,
+				},
+				{
+					Timestamp: 1027,
+					Value:     27,
+				},
+				{
+					Timestamp: 1028,
+					Value:     28,
+				},
+				{
+					Timestamp: 1029,
+					Value:     29,
 				},
 				{
 					Timestamp: 1030,
