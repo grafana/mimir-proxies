@@ -54,20 +54,11 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		return nil, fmt.Errorf("whisper file contains no archives for metric: %q", name)
 	}
 
-	// TODO We can probably get rid of this once we finalize changes
-	totalPoints := 0
-	for _, a := range w.GetArchives() {
-		totalPoints += int(a.Points)
-	}
-
-	// Preallocate space for all allPoints in one slice.
-	allPoints := make([]pointWithPrecision, totalPoints)
 	// Dump one precision level at a time and write into the output slice.
 	// Its important to remember that the archive with index 0 (first archive)
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
-
-	// TODO (sort archives on seconds per point) then keep maxTs per archive and drop all points seen in the previous archive
-	idxPoint := 0
+	seenTs := map[uint32]struct{}{}
+	var allKeptPoints [][]pointWithPrecision
 	for i, a := range w.GetArchives() {
 		archivePoints, err := w.DumpArchive(i)
 		if err != nil {
@@ -75,10 +66,9 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		}
 
 		var minArchiveTs, maxArchiveTs uint32
-		for _, p := range archivePoints { // Double pass to find maxTs, inefficient
+		for _, p := range archivePoints {
 			// We want to track the max timestamp of the archive because we know
-			// it virtually represents now() for the archive and in prometheus
-			// block terms it would give us the max timestamp of the archive.
+			// it virtually represents now() and we wont have newer points.
 			// Then the min timestamp of the archive would be maxTs - the archive
 			// retention.
 			if p.Timestamp > maxArchiveTs {
@@ -92,42 +82,46 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			minArchiveTs = maxArchiveTs - a.Retention()
 		}
 
+		var keptPoints []pointWithPrecision
 		for _, p := range archivePoints {
-			// If the point is older than minArchiveTs then we want to skip it.
 			if p.Timestamp < minArchiveTs {
 				continue
 			}
-			allPoints[idxPoint] = pointWithPrecision{p, a.SecondsPerPoint}
-			idxPoint++
+			// If we have already seen a point with the same timestamp it means
+			// we already have a point from an archive with higher precision that
+			// we want to keep. So we skip this point.
+			if _, ok := seenTs[p.Timestamp]; ok {
+				continue
+			}
+			keptPoints = append(keptPoints, pointWithPrecision{p, a.SecondsPerPoint})
+			seenTs[p.Timestamp] = struct{}{}
 		}
-		// TODO sort allpoints by timestamp
-	}
 
-	// Points must be in time order.
-	sort.Slice(allPoints, func(i, j int) bool {
-		return allPoints[i].Timestamp < allPoints[j].Timestamp
-	})
+		// Points are not necessarily in order because the archive is a ring buffer
+		// so we order the slice
+		sort.Slice(keptPoints, func(i, j int) bool {
+			return keptPoints[i].Timestamp < keptPoints[j].Timestamp
+		})
+
+		allKeptPoints = append(allKeptPoints, keptPoints)
+	}
 
 	trimmedPoints := []whisper.Point{}
-	for i := 0; i < len(allPoints); i++ {
-		// Remove all points of time = 0.
-		if allPoints[i].Timestamp == 0 {
-			continue
-		}
-		// There might be duplicate timestamps in different archives. Take the
-		// higher-precision archive value since it's unaggregated.
-		if i > 0 && allPoints[i].Timestamp == allPoints[i-1].Timestamp {
-			if allPoints[i].secondsPerPoint == allPoints[i-1].secondsPerPoint {
-				return nil, fmt.Errorf("duplicate timestamp at same precision in archive %s: %d", name, allPoints[i].Timestamp)
+	for _, points := range allKeptPoints {
+		for _, p := range points {
+			// Remove all points of time = 0.
+			if p.Timestamp == 0 {
+				continue
 			}
-			if allPoints[i].secondsPerPoint < allPoints[i-1].secondsPerPoint {
-				trimmedPoints[len(trimmedPoints)-1] = allPoints[i].Point
-			}
-			// If the previous point is higher precision, just continue.
-			continue
+			trimmedPoints = append(trimmedPoints, p.Point)
 		}
-		trimmedPoints = append(trimmedPoints, allPoints[i].Point)
 	}
+
+	// We need to finally sort the trimmed points again because different archives
+	// may overlap and have older points
+	sort.Slice(trimmedPoints, func(i, j int) bool {
+		return trimmedPoints[i].Timestamp < trimmedPoints[j].Timestamp
+	})
 
 	return trimmedPoints, nil
 }
