@@ -58,7 +58,7 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 	// Its important to remember that the archive with index 0 (first archive)
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
 	seenTs := map[uint32]struct{}{}
-	var allKeptPoints [][]pointWithPrecision
+	var keptPoints []whisper.Point
 	for i, a := range w.GetArchives() {
 		archivePoints, err := w.DumpArchive(i)
 		if err != nil {
@@ -82,7 +82,6 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			minArchiveTs = maxArchiveTs - a.Retention()
 		}
 
-		var keptPoints []pointWithPrecision
 		for _, p := range archivePoints {
 			if p.Timestamp < minArchiveTs {
 				continue
@@ -93,37 +92,22 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			if _, ok := seenTs[p.Timestamp]; ok {
 				continue
 			}
-			keptPoints = append(keptPoints, pointWithPrecision{p, a.SecondsPerPoint})
-			seenTs[p.Timestamp] = struct{}{}
-		}
-
-		// Points are not necessarily in order because the archive is a ring buffer
-		// so we order the slice
-		sort.Slice(keptPoints, func(i, j int) bool {
-			return keptPoints[i].Timestamp < keptPoints[j].Timestamp
-		})
-
-		allKeptPoints = append(allKeptPoints, keptPoints)
-	}
-
-	trimmedPoints := []whisper.Point{}
-	for _, points := range allKeptPoints {
-		for _, p := range points {
-			// Remove all points of time = 0.
+			// Skip points with time = 0
 			if p.Timestamp == 0 {
 				continue
 			}
-			trimmedPoints = append(trimmedPoints, p.Point)
+			keptPoints = append(keptPoints, whisper.Point{Timestamp: p.Timestamp, Value: p.Value})
+			seenTs[p.Timestamp] = struct{}{}
 		}
 	}
 
-	// We need to finally sort the trimmed points again because different archives
+	// We need to finally sort the kept points again because different archives
 	// may overlap and have older points
-	sort.Slice(trimmedPoints, func(i, j int) bool {
-		return trimmedPoints[i].Timestamp < trimmedPoints[j].Timestamp
+	sort.Slice(keptPoints, func(i, j int) bool {
+		return keptPoints[i].Timestamp < keptPoints[j].Timestamp
 	})
 
-	return trimmedPoints, nil
+	return keptPoints, nil
 }
 
 // ToMimirSamples converts a Whisper metric with the given name to a slice of
