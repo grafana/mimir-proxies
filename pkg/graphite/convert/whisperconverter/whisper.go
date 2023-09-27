@@ -63,13 +63,14 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 	// Dump one precision level at a time and write into the output slice.
 	// Its important to remember that the archive with index 0 (first archive)
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
-	archivePoints := make([][]whisper.Point, len(archives))
 	var keptPoints []whisper.Point
+
 	// We want to track the max timestamp of the archives because we know
 	// it virtually represents now() and we wont have newer points.
 	// Then the min timestamp of the archive would be maxTs - each archive
 	// retention.
 	var maxTs uint32
+
 	for i, a := range archives {
 		points, err := w.DumpArchive(i)
 		if err != nil {
@@ -86,7 +87,7 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		}
 
 		var minArchiveTs uint32
-		if maxTs < a.Retention() { // very big retention
+		if maxTs < a.Retention() { // very big retention, invalid.
 			minArchiveTs = 0
 		} else {
 			minArchiveTs = maxTs - a.Retention()
@@ -96,14 +97,14 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		sort.Slice(points, func(i, j int) bool {
 			return points[i].Timestamp < points[j].Timestamp
 		})
-		archivePoints[i] = points
 
-		// Store a number of indexes so we can look for duplicate points efficiently.
-		archiveIdx := make([]int, i)
-
-POINTLOOP:
-		for _, p := range archivePoints[i] {
-			// Skip points with time = 0
+		// We are going to append to keptPoints, so we store the original length so
+		// when we check for seen points, we don't include the ones we've been
+		// adding.
+		keptPointIdx := 0
+		keptPointLen := len(keptPoints)
+	POINTLOOP:
+		for _, p := range points {
 			if p.Timestamp == 0 {
 				continue
 			}
@@ -111,35 +112,25 @@ POINTLOOP:
 				continue
 			}
 
-			// For each of the previous archives, check to see if a point already
-			// exists at this timestamp. If it does, we don't add this point and
-			// keep the higher resolution point.
-			for x := range archiveIdx {
-				for {
-					if archiveIdx[x] >= len(archivePoints[x]) {
-						break
-					}
-					// We found a match, so skip this point
-					if archivePoints[x][archiveIdx[x]].Timestamp == p.Timestamp {
-						continue POINTLOOP
-					}
-					// The previous archive does not have this point, so stop.
-					if archivePoints[x][archiveIdx[x]].Timestamp > p.Timestamp {
-						break
-					}
-					archiveIdx[x]++
+			// Check to see if a point is already kept at this timestamp. If it is,
+			// we don't add this point and keep the higher resolution point.
+			for ; keptPointIdx < keptPointLen; keptPointIdx++ {
+				if keptPoints[keptPointIdx].Timestamp == p.Timestamp {
+					continue POINTLOOP
+				}
+				if keptPoints[keptPointIdx].Timestamp > p.Timestamp {
+					break
 				}
 			}
 
 			keptPoints = append(keptPoints, whisper.Point{Timestamp: p.Timestamp, Value: p.Value})
 		}
+		// We need to sort the kept points because different archives may overlap
+		// and have older points
+		sort.Slice(keptPoints, func(i, j int) bool {
+			return keptPoints[i].Timestamp < keptPoints[j].Timestamp
+		})
 	}
-
-	// We need to finally sort the kept points again because different archives
-	// may overlap and have older points
-	sort.Slice(keptPoints, func(i, j int) bool {
-		return keptPoints[i].Timestamp < keptPoints[j].Timestamp
-	})
 
 	return keptPoints, nil
 }
