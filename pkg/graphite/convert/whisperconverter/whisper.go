@@ -50,66 +50,88 @@ type pointWithPrecision struct {
 
 // ReadPoints reads and concatenates all of the points in a whisper Archive.
 func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
-	if len(w.GetArchives()) == 0 {
+	archives := w.GetArchives()
+	if len(archives) == 0 {
 		return nil, fmt.Errorf("whisper file contains no archives for metric: %q", name)
 	}
+
+	// Ensure archives are sorted by precision just in case.
+	sort.Slice(archives, func(i, j int) bool {
+		return archives[i].SecondsPerPoint < archives[j].SecondsPerPoint
+	})
 
 	// Dump one precision level at a time and write into the output slice.
 	// Its important to remember that the archive with index 0 (first archive)
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
-	seenTs := map[uint32]struct{}{}
-	lastMinTs := uint32(0)
+	archivePoints := make([][]whisper.Point, len(archives))
 	var keptPoints []whisper.Point
-	for i, a := range w.GetArchives() {
-		archivePoints, err := w.DumpArchive(i)
+	// We want to track the max timestamp of the archives because we know
+	// it virtually represents now() and we wont have newer points.
+	// Then the min timestamp of the archive would be maxTs - each archive
+	// retention.
+	var maxTs uint32
+	for i, a := range archives {
+		points, err := w.DumpArchive(i)
 		if err != nil {
 			return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
 		}
 
-		var minArchiveTs, maxArchiveTs uint32
-		// calculate maxArchiveTs
-		for _, p := range archivePoints {
-			// We want to track the max timestamp of the archive because we know
-			// it virtually represents now() and we wont have newer points.
-			// Then the min timestamp of the archive would be maxTs - the archive
-			// retention.
-			if p.Timestamp > maxArchiveTs {
-				maxArchiveTs = p.Timestamp
+		// All archives share the same maxArchiveTs, so only calculate it once.
+		if i == 0 {
+			for _, p := range points {
+				if p.Timestamp > maxTs {
+					maxTs = p.Timestamp
+				}
 			}
 		}
 
-		// calculate minArchiveTs
-		if maxArchiveTs-a.Retention() > maxArchiveTs { // overflow, very big retention
+		var minArchiveTs uint32
+		if maxTs < a.Retention() { // very big retention
 			minArchiveTs = 0
 		} else {
-			minArchiveTs = maxArchiveTs - a.Retention()
+			minArchiveTs = maxTs - a.Retention()
 		}
 
-		// For subsequent archives
-		if lastMinTs > 0 {
-			// if we are already in the second or subsequent archive and we had
-			// some points in the prior archives, we want to skip
-			// samples in the previous archives
-			maxArchiveTs = lastMinTs
-		}
-		lastMinTs = minArchiveTs
+		// Sort this archive.
+		sort.Slice(points, func(i, j int) bool {
+			return points[i].Timestamp < points[j].Timestamp
+		})
+		archivePoints[i] = points
 
-		for _, p := range archivePoints {
-			if p.Timestamp < minArchiveTs {
-				continue
-			}
-			// If we have already seen a point with the same timestamp it means
-			// we already have a point from an archive with higher precision that
-			// we want to keep. So we skip this point.
-			if _, ok := seenTs[p.Timestamp]; ok {
-				continue
-			}
+		// Store a number of indexes so we can look for duplicate points efficiently.
+		archiveIdx := make([]int, i)
+
+POINTLOOP:
+		for _, p := range archivePoints[i] {
 			// Skip points with time = 0
 			if p.Timestamp == 0 {
 				continue
 			}
+			if p.Timestamp < minArchiveTs {
+				continue
+			}
+
+			// For each of the previous archives, check to see if a point already
+			// exists at this timestamp. If it does, we don't add this point and
+			// keep the higher resolution point.
+			for x := range archiveIdx {
+				for {
+					if archiveIdx[x] >= len(archivePoints[x]) {
+						break
+					}
+					// We found a match, so skip this point
+					if archivePoints[x][archiveIdx[x]].Timestamp == p.Timestamp {
+						continue POINTLOOP
+					}
+					// The previous archive does not have this point, so stop.
+					if archivePoints[x][archiveIdx[x]].Timestamp > p.Timestamp {
+						break
+					}
+					archiveIdx[x]++
+				}
+			}
+
 			keptPoints = append(keptPoints, whisper.Point{Timestamp: p.Timestamp, Value: p.Value})
-			seenTs[p.Timestamp] = struct{}{}
 		}
 	}
 
