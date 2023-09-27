@@ -95,7 +95,7 @@ func TestExtractWhisperPoints(t *testing.T) {
 						whisper.NewPoint(time.Unix(1058, 0), 1),   // skipped, covered by other archive
 						whisper.NewPoint(time.Unix(1060, 0), 102), // duplicate, the one in the archive above should be kept and this one skipped
 						whisper.NewPoint(time.Unix(650, 0), 50),   // skipped due to being out of retention
-						whisper.NewPoint(time.Unix(1055, 0), 5),
+						whisper.NewPoint(time.Unix(1055, 0), 5),   // skipped, covered by other archive
 						whisper.NewPoint(time.Unix(901, 0), 4),
 					},
 				},

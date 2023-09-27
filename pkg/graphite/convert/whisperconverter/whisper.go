@@ -104,13 +104,9 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			return points[i].Timestamp < points[j].Timestamp
 		})
 
-		// We are going to append to keptPoints, so we store the original length so
-		// when we check for seen points, we don't include the ones we've been
-		// adding.
-		keptPointIdx := 0
-		keptPointLen := len(keptPoints)
-	POINTLOOP:
-		for _, p := range points {
+		startIdx := -1
+		endIdx := len(points) - 1
+		for j, p := range points {
 			if p.Timestamp == 0 {
 				continue
 			}
@@ -122,27 +118,17 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			// Don't include any points in this archive that were covered in a higher
 			// resolution archive.
 			if p.Timestamp >= lastMinTs {
-				continue
+				break
 			}
-
-			// Check to see if a point is already kept at this timestamp. If it is,
-			// we don't add this point and keep the higher resolution point.
-			for ; keptPointIdx < keptPointLen; keptPointIdx++ {
-				if keptPoints[keptPointIdx].Timestamp == p.Timestamp {
-					continue POINTLOOP
-				}
-				if keptPoints[keptPointIdx].Timestamp > p.Timestamp {
-					break
-				}
+			endIdx = j
+			if startIdx == -1 {
+				startIdx = j
 			}
-
-			keptPoints = append(keptPoints, whisper.Point{Timestamp: p.Timestamp, Value: p.Value})
 		}
-		// We need to sort the kept points because different archives may overlap
-		// and have older points
-		sort.Slice(keptPoints, func(i, j int) bool {
-			return keptPoints[i].Timestamp < keptPoints[j].Timestamp
-		})
+		// if startIdx is -1, we did not find any valid points.
+		if startIdx != -1 {
+			keptPoints = append(points[startIdx:endIdx+1], keptPoints...)
+		}
 		lastMinTs = minArchiveTs
 	}
 
