@@ -41,14 +41,6 @@ type Archive interface {
 	DumpArchive(int) ([]whisper.Point, error)
 }
 
-// pointWithPrecision is a whisper Point with the precision of the archive it
-// came from. This is used to differentiate when we have duplicate timestamps at
-// different precisions.
-type pointWithPrecision struct {
-	whisper.Point
-	secondsPerPoint uint32
-}
-
 // ReadPoints reads and concatenates all of the points in a whisper Archive.
 func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 	archives := w.GetArchives()
