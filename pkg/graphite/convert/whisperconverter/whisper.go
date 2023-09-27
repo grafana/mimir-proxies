@@ -48,11 +48,6 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		return nil, fmt.Errorf("whisper file contains no archives for metric: %q", name)
 	}
 
-	// Ensure archives are sorted by precision just in case.
-	sort.Slice(archives, func(i, j int) bool {
-		return archives[i].SecondsPerPoint < archives[j].SecondsPerPoint
-	})
-
 	// Dump one precision level at a time and write into the output slice.
 	// Its important to remember that the archive with index 0 (first archive)
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
