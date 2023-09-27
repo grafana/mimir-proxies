@@ -3,6 +3,7 @@ package whisperconverter
 import (
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"sort"
 	"time"
@@ -70,6 +71,7 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 	// Then the min timestamp of the archive would be maxTs - each archive
 	// retention.
 	var maxTs uint32
+	lastMinTs := uint32(math.MaxUint32)
 
 	for i, a := range archives {
 		points, err := w.DumpArchive(i)
@@ -105,10 +107,23 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		keptPointLen := len(keptPoints)
 	POINTLOOP:
 		for _, p := range points {
+			// turn the unix timestamp into a string
+			timeStr  := time.Unix(int64(p.Timestamp), 0).Format("2006-01-02 15:04:05")
+
+			if p.Value > 400 {
+				fmt.Println("archive", i, timeStr, p.Value)
+			}
 			if p.Timestamp == 0 {
 				continue
 			}
+			// Don't include any points in this archive that are past the retention
+			// period.
 			if p.Timestamp < minArchiveTs {
+				continue
+			}
+			// Don't include any points in this archive that were covered in a higher
+			// resolution archive.
+			if p.Timestamp >= lastMinTs {
 				continue
 			}
 
@@ -130,6 +145,7 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		sort.Slice(keptPoints, func(i, j int) bool {
 			return keptPoints[i].Timestamp < keptPoints[j].Timestamp
 		})
+		lastMinTs = minArchiveTs
 	}
 
 	return keptPoints, nil
