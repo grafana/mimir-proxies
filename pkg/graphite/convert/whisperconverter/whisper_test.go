@@ -78,8 +78,8 @@ func TestExtractWhisperPoints(t *testing.T) {
 			metricName: "mymetric",
 			archive: &testArchive{
 				infos: []whisper.ArchiveInfo{
-					simpleArchiveInfo(6, 1),
-					simpleArchiveInfo(6, 60),
+					simpleArchiveInfo(120, 1),
+					simpleArchiveInfo(4, 60),
 				},
 				points: [][]whisper.Point{
 					{
@@ -91,16 +91,21 @@ func TestExtractWhisperPoints(t *testing.T) {
 						whisper.NewPoint(time.Unix(1056, 0), 27.5),
 					},
 					{
-						whisper.NewPoint(time.Unix(0, 0), 12), // skipped
-						whisper.NewPoint(time.Unix(1058, 0), 1),
+						whisper.NewPoint(time.Unix(0, 0), 12),     // skipped
+						whisper.NewPoint(time.Unix(1058, 0), 1),   // skipped, covered by other archive
 						whisper.NewPoint(time.Unix(1060, 0), 102), // duplicate, the one in the archive above should be kept and this one skipped
-						whisper.NewPoint(time.Unix(1121, 0), 4),
-						whisper.NewPoint(time.Unix(650, 0), 50), // skipped due to being out of retention
+						whisper.NewPoint(time.Unix(650, 0), 50),   // skipped due to being out of retention
 						whisper.NewPoint(time.Unix(1055, 0), 5),
+						whisper.NewPoint(time.Unix(901, 0), 4),
 					},
 				},
 			},
 			want: []whisper.Point{
+				// We do not to any rounding / conversion of time values.
+				{
+					Timestamp: 901,
+					Value:     4,
+				},
 				{
 					Timestamp: 1054,
 					Value:     12,
@@ -114,17 +119,8 @@ func TestExtractWhisperPoints(t *testing.T) {
 					Value:     27.5,
 				},
 				{
-					Timestamp: 1058,
-					Value:     1,
-				},
-				{
 					Timestamp: 1060,
 					Value:     2,
-				},
-				// We do not to any rounding / conversion of time values.
-				{
-					Timestamp: 1121,
-					Value:     4,
 				},
 			},
 		},
@@ -145,9 +141,9 @@ func TestExtractWhisperPoints(t *testing.T) {
 					//  [          XXXXXXXXX]
 					//  [                   XXXXXXXX]
 
-					simpleArchiveInfo(11, 1),
-					simpleArchiveInfo(8, 3),
-					simpleArchiveInfo(7, 6),
+					simpleArchiveInfo(10, 1),
+					simpleArchiveInfo(7, 3),
+					simpleArchiveInfo(6, 6),
 				},
 				points: [][]whisper.Point{
 					{
@@ -272,9 +268,9 @@ func TestExtractWhisperPoints(t *testing.T) {
 					//  [          XXXXXXXXX]
 					//  [                   XXXXXXXX]
 
-					simpleArchiveInfo(11, 1),
-					simpleArchiveInfo(8, 3),
-					simpleArchiveInfo(7, 6),
+					simpleArchiveInfo(10, 1),
+					simpleArchiveInfo(7, 3),
+					simpleArchiveInfo(6, 6),
 				},
 				points: [][]whisper.Point{
 					{},
@@ -283,18 +279,18 @@ func TestExtractWhisperPoints(t *testing.T) {
 					},
 					{
 						whisper.NewPoint(time.Unix(1009, 0), 99), // skipped because archive 1 has a point at this time
-						whisper.NewPoint(time.Unix(1012, 0), 12),
+						whisper.NewPoint(time.Unix(975, 0), 12),
 					},
 				},
 			},
 			want: []whisper.Point{
 				{
-					Timestamp: 1009,
-					Value:     9,
+					Timestamp: 975,
+					Value:     12,
 				},
 				{
-					Timestamp: 1012,
-					Value:     12,
+					Timestamp: 1009,
+					Value:     9,
 				},
 			},
 		},

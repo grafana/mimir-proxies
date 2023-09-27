@@ -79,8 +79,12 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
 		}
 
+		if len(points) == 0 {
+			continue
+		}
+
 		// All archives share the same maxArchiveTs, so only calculate it once.
-		if i == 0 {
+		if maxTs == 0 {
 			for _, p := range points {
 				if p.Timestamp > maxTs {
 					maxTs = p.Timestamp
@@ -107,12 +111,6 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		keptPointLen := len(keptPoints)
 	POINTLOOP:
 		for _, p := range points {
-			// turn the unix timestamp into a string
-			timeStr  := time.Unix(int64(p.Timestamp), 0).Format("2006-01-02 15:04:05")
-
-			if p.Value > 400 {
-				fmt.Println("archive", i, timeStr, p.Value)
-			}
 			if p.Timestamp == 0 {
 				continue
 			}
