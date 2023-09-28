@@ -53,25 +53,21 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
 	var keptPoints []whisper.Point
 
-	// We want to track the max timestamp of the archives because we know
-	// it virtually represents now() and we wont have newer points.
-	// Then the min timestamp of the archive would be maxTs - each archive
-	// retention.
+	// We want to track the max timestamp of the archives because we know it
+	// virtually represents now() and we wont have newer points. Then the min
+	// timestamp of the archive would be maxTs - each archive retention.
 	var maxTs uint32
-	lastMinTs := uint32(math.MaxUint32)
 
+	// Also determine the lower bound of each archive, which is the upper bound of
+	// the next archive.
+	minArchiveTs := make([]uint32, len(archives))
 	for i, a := range archives {
-		points, err := w.DumpArchive(i)
-		if err != nil {
-			return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
-		}
-
-		if len(points) == 0 {
-			continue
-		}
-
 		// All archives share the same maxArchiveTs, so only calculate it once.
 		if maxTs == 0 {
+			points, err := w.DumpArchive(i)
+			if err != nil {
+				return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
+			}
 			for _, p := range points {
 				if p.Timestamp > maxTs {
 					maxTs = p.Timestamp
@@ -79,11 +75,24 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			}
 		}
 
-		var minArchiveTs uint32
 		if maxTs < a.Retention() { // very big retention, invalid.
-			minArchiveTs = 0
+			minArchiveTs[i] = uint32(math.MaxUint32)
 		} else {
-			minArchiveTs = maxTs - a.Retention()
+			minArchiveTs[i] = maxTs - a.Retention()
+		}
+	}
+
+	// Iterate over archives backwards so we process oldest points first. Sort the
+	// points, then determine the slice that is between the bounds for this
+	// archive, and append those to the output array.
+	for i := len(archives) - 1; i >= 0; i-- {
+		points, err := w.DumpArchive(i)
+		if err != nil {
+			return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
+		}
+
+		if len(points) == 0 {
+			continue
 		}
 
 		// Sort this archive.
@@ -97,14 +106,14 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			if p.Timestamp == 0 {
 				continue
 			}
-			// Don't include any points in this archive that are past the retention
-			// period.
-			if p.Timestamp <= minArchiveTs {
+			// Don't include any points in this archive that are older than the
+			// retention period.
+			if p.Timestamp <= minArchiveTs[i] {
 				continue
 			}
-			// Don't include any points in this archive that were covered in a higher
+			// Don't include any points in this archive that are covered in a higher
 			// resolution archive.
-			if p.Timestamp > lastMinTs {
+			if i > 0 && p.Timestamp > minArchiveTs[i-1] {
 				break
 			}
 			endIdx = j
@@ -114,9 +123,8 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		}
 		// if startIdx is -1, we did not find any valid points.
 		if startIdx != -1 {
-			keptPoints = append(points[startIdx:endIdx+1], keptPoints...)
+			keptPoints = append(keptPoints, points[startIdx:endIdx+1]...)
 		}
-		lastMinTs = minArchiveTs
 	}
 
 	return keptPoints, nil
