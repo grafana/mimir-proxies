@@ -9,14 +9,15 @@ import (
 	"time"
 
 	"github.com/go-kit/log"
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
-	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
 	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/kisielk/whisper-go/whisper"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/tsdb"
 	"github.com/stretchr/testify/require"
+
+	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
+	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
 )
 
 func simpleArchiveInfo(points, secondsPerPoint int) whisper.ArchiveInfo {
@@ -73,29 +74,268 @@ func TestExtractWhisperPoints(t *testing.T) {
 			},
 		},
 		{
+			name:       "simple series, large retention",
+			metricName: "mymetric",
+			archive: &testArchive{
+				infos: []whisper.ArchiveInfo{
+					simpleArchiveInfo(6000, 1),
+					simpleArchiveInfo(6000, 60),
+				},
+				points: [][]whisper.Point{
+					{
+						whisper.NewPoint(time.Unix(1000, 0), 1),
+					},
+					// None of the points in this archive are valid because all points
+					// are covered by the first archive.
+					{
+						whisper.NewPoint(time.Unix(940, 0), 2),
+					},
+				},
+			},
+			want: []whisper.Point{
+				{
+					Timestamp: 1000,
+					Value:     1,
+				},
+			},
+		},
+		{
 			name:       "multiple series, different intervals, zeros, duplicate points",
 			metricName: "mymetric",
 			archive: &testArchive{
 				infos: []whisper.ArchiveInfo{
-					simpleArchiveInfo(6, 1),
-					simpleArchiveInfo(6, 60),
+					simpleArchiveInfo(120, 1),
+					simpleArchiveInfo(4, 60),
 				},
 				points: [][]whisper.Point{
 					{
-						whisper.NewPoint(time.Unix(0, 0), 12),
-						whisper.NewPoint(time.Unix(0, 0), 12),
-						whisper.NewPoint(time.Unix(1000, 0), 12),
-						whisper.NewPoint(time.Unix(1001, 0), 42),
+						whisper.NewPoint(time.Unix(0, 0), 12),   // skipped
+						whisper.NewPoint(time.Unix(900, 0), 12), // skipped due to being out of retention
+						whisper.NewPoint(time.Unix(1054, 0), 12),
+						whisper.NewPoint(time.Unix(1055, 0), 42),
 						whisper.NewPoint(time.Unix(1060, 0), 2),
-						whisper.NewPoint(time.Unix(1002, 0), 27.5),
+						whisper.NewPoint(time.Unix(1056, 0), 27.5),
 					},
 					{
-						whisper.NewPoint(time.Unix(0, 0), 12),
-						whisper.NewPoint(time.Unix(1004, 0), 1),
-						whisper.NewPoint(time.Unix(1060, 0), 102),
-						whisper.NewPoint(time.Unix(1121, 0), 4),
-						whisper.NewPoint(time.Unix(0, 0), 0),
-						whisper.NewPoint(time.Unix(1001, 0), 5),
+						whisper.NewPoint(time.Unix(0, 0), 12),     // skipped
+						whisper.NewPoint(time.Unix(1058, 0), 1),   // skipped, covered by other archive
+						whisper.NewPoint(time.Unix(1060, 0), 102), // duplicate, the one in the archive above should be kept and this one skipped
+						whisper.NewPoint(time.Unix(650, 0), 50),   // skipped due to being out of retention
+						whisper.NewPoint(time.Unix(1055, 0), 5),   // skipped, covered by other archive
+						whisper.NewPoint(time.Unix(901, 0), 4),
+					},
+				},
+			},
+			want: []whisper.Point{
+				// We do not to any rounding / conversion of time values.
+				{
+					Timestamp: 901,
+					Value:     4,
+				},
+				{
+					Timestamp: 1054,
+					Value:     12,
+				},
+				{
+					Timestamp: 1055,
+					Value:     42,
+				},
+				{
+					Timestamp: 1056,
+					Value:     27.5,
+				},
+				{
+					Timestamp: 1060,
+					Value:     2,
+				},
+			},
+		},
+		{
+			name:       "single series, multiple archives and retentions, with duplicates and points beyond retention",
+			metricName: "mymetric",
+			archive: &testArchive{
+				infos: []whisper.ArchiveInfo{
+					// This is what the test will define
+					// Maxts                        Mints
+					// 1030     1020     1009     994
+					//  [         ]
+					//  [                  ]
+					//  [                           ]
+					// And this is what the test will expect
+					// 1030     1020     1009     994
+					//  [XXXXXXXXX]
+					//  [          XXXXXXXXX]
+					//  [                   XXXXXXXX]
+
+					simpleArchiveInfo(10, 1),
+					simpleArchiveInfo(7, 3),
+					simpleArchiveInfo(6, 6),
+				},
+				points: [][]whisper.Point{
+					{
+						whisper.NewPoint(time.Unix(1020, 0), 20), // Skipped, this is past the lower bound of this archive.
+						whisper.NewPoint(time.Unix(1021, 0), 21),
+						whisper.NewPoint(time.Unix(1022, 0), 22),
+						whisper.NewPoint(time.Unix(1023, 0), 23),
+						whisper.NewPoint(time.Unix(1024, 0), 24),
+						whisper.NewPoint(time.Unix(1025, 0), 25),
+						whisper.NewPoint(time.Unix(1026, 0), 26),
+						whisper.NewPoint(time.Unix(1027, 0), 27),
+						whisper.NewPoint(time.Unix(1028, 0), 28),
+						whisper.NewPoint(time.Unix(1029, 0), 29),
+						whisper.NewPoint(time.Unix(1030, 0), 30),
+					},
+					{
+						whisper.NewPoint(time.Unix(1009, 0), 9), // Skipped, this is past the lower bound of this archive.
+						whisper.NewPoint(time.Unix(1012, 0), 12),
+						whisper.NewPoint(time.Unix(1015, 0), 15),
+						whisper.NewPoint(time.Unix(1018, 0), 18),
+						whisper.NewPoint(time.Unix(1021, 0), 21), // skipped
+						whisper.NewPoint(time.Unix(1024, 0), 24), // skipped
+						whisper.NewPoint(time.Unix(1027, 0), 27), // skipped
+						whisper.NewPoint(time.Unix(1030, 0), 30), // skipped
+					},
+					{
+						whisper.NewPoint(time.Unix(1000, 0), 0),
+						whisper.NewPoint(time.Unix(1006, 0), 6),
+						whisper.NewPoint(time.Unix(1009, 0), 99), // This is the upper bound of this archive
+						whisper.NewPoint(time.Unix(1012, 0), 12), // skipped
+						whisper.NewPoint(time.Unix(1018, 0), 18), // skipped
+						whisper.NewPoint(time.Unix(1024, 0), 24), // skipped
+						whisper.NewPoint(time.Unix(1030, 0), 30), // skipped
+					},
+				},
+			},
+			want: []whisper.Point{
+				{
+					Timestamp: 1000,
+					Value:     0,
+				},
+				{
+					Timestamp: 1006,
+					Value:     6,
+				},
+				{
+					Timestamp: 1009,
+					Value:     99,
+				},
+				{
+					Timestamp: 1012,
+					Value:     12,
+				},
+				{
+					Timestamp: 1015,
+					Value:     15,
+				},
+				{
+					Timestamp: 1018,
+					Value:     18,
+				},
+				{
+					Timestamp: 1021,
+					Value:     21,
+				},
+				{
+					Timestamp: 1022,
+					Value:     22,
+				},
+				{
+					Timestamp: 1023,
+					Value:     23,
+				},
+				{
+					Timestamp: 1024,
+					Value:     24,
+				},
+				{
+					Timestamp: 1025,
+					Value:     25,
+				},
+				{
+					Timestamp: 1026,
+					Value:     26,
+				},
+				{
+					Timestamp: 1027,
+					Value:     27,
+				},
+				{
+					Timestamp: 1028,
+					Value:     28,
+				},
+				{
+					Timestamp: 1029,
+					Value:     29,
+				},
+				{
+					Timestamp: 1030,
+					Value:     30,
+				},
+			},
+		},
+		{
+			name:       "test retention when archives are empty",
+			metricName: "mymetric",
+			archive: &testArchive{
+				infos: []whisper.ArchiveInfo{
+					simpleArchiveInfo(10, 1),
+					simpleArchiveInfo(7, 3),
+					simpleArchiveInfo(6, 6),
+				},
+				points: [][]whisper.Point{
+					{},
+					{},
+					{},
+				},
+			},
+			want: []whisper.Point{},
+		},
+		{
+			name:       "test retention when first archives are empty",
+			metricName: "mymetric",
+			archive: &testArchive{
+				infos: []whisper.ArchiveInfo{
+					simpleArchiveInfo(10, 1),
+					simpleArchiveInfo(7, 3),
+					simpleArchiveInfo(6, 6),
+				},
+				points: [][]whisper.Point{
+					{},
+					{
+						whisper.NewPoint(time.Unix(1009, 0), 9),
+					},
+					{
+						whisper.NewPoint(time.Unix(1009, 0), 99), // skipped because archive 1 has a point at this time
+						whisper.NewPoint(time.Unix(998, 0), 12),
+					},
+				},
+			},
+			want: []whisper.Point{
+				{
+					Timestamp: 998,
+					Value:     12,
+				},
+				{
+					Timestamp: 1009,
+					Value:     9,
+				},
+			},
+		},
+		{
+			name:       "test retention when first archives are empty",
+			metricName: "mymetric",
+			archive: &testArchive{
+				infos: []whisper.ArchiveInfo{
+					simpleArchiveInfo(10, 1),
+					simpleArchiveInfo(7, 3),
+					simpleArchiveInfo(6, 6),
+				},
+				points: [][]whisper.Point{
+					{},
+					{},
+					{
+						whisper.NewPoint(time.Unix(1009, 0), 99), // skipped because archive 1 has a point at this time
+						whisper.NewPoint(time.Unix(1000, 0), 12),
 					},
 				},
 			},
@@ -105,25 +345,8 @@ func TestExtractWhisperPoints(t *testing.T) {
 					Value:     12,
 				},
 				{
-					Timestamp: 1001,
-					Value:     42,
-				},
-				{
-					Timestamp: 1002,
-					Value:     27.5,
-				},
-				{
-					Timestamp: 1004,
-					Value:     1,
-				},
-				{
-					Timestamp: 1060,
-					Value:     2,
-				},
-				// We do not to any rounding / conversion of time values.
-				{
-					Timestamp: 1121,
-					Value:     4,
+					Timestamp: 1009,
+					Value:     99,
 				},
 			},
 		},
@@ -137,18 +360,18 @@ func TestExtractWhisperPoints(t *testing.T) {
 				points: [][]whisper.Point{
 					{
 						whisper.NewPoint(time.Unix(2002, 0), 4),
-						whisper.NewPoint(time.Unix(1000, 0), 87),
-						whisper.NewPoint(time.Unix(1501, 0), 112),
+						whisper.NewPoint(time.Unix(2000, 0), 87),
+						whisper.NewPoint(time.Unix(2001, 0), 112),
 					},
 				},
 			},
 			want: []whisper.Point{
 				{
-					Timestamp: 1000,
+					Timestamp: 2000,
 					Value:     87,
 				},
 				{
-					Timestamp: 1501,
+					Timestamp: 2001,
 					Value:     112,
 				},
 				{

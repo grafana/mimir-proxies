@@ -8,7 +8,9 @@ import (
 	"os"
 	"regexp"
 	"testing"
+	"time"
 
+	"github.com/go-graphite/go-whisper"
 	"github.com/go-kit/log"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/stretchr/testify/require"
@@ -16,9 +18,17 @@ import (
 
 // This test contains a data due to how we take over STDOUT but it should be harmless.
 func TestCommandDateRange(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("/tmp", "testCommandDateRange*")
-	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	// tmpDir, err := os.MkdirTemp("/tmp", "testCommandDateRange*")
+	// require.NoError(t, err)
+	// defer os.RemoveAll(tmpDir)
+	whisper.Now = func() time.Time {
+		t, err := time.Parse("2006-01-02", "2022-06-01")
+		if err != nil {
+			panic(err)
+		}
+		return t
+	}
+	tmpDir := "/tmp"
 
 	fooTimes, err := ToTimes([]string{
 		"2022-05-01",

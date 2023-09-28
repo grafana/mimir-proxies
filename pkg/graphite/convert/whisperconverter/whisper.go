@@ -40,67 +40,110 @@ type Archive interface {
 	DumpArchive(int) ([]whisper.Point, error)
 }
 
-// pointWithPrecision is a whisper Point with the precision of the archive it
-// came from. This is used to differentiate when we have duplicate timestamps at
-// different precisions.
-type pointWithPrecision struct {
-	whisper.Point
-	secondsPerPoint uint32
-}
-
 // ReadPoints reads and concatenates all of the points in a whisper Archive.
 func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
-	if len(w.GetArchives()) == 0 {
+	archives := w.GetArchives()
+	if len(archives) == 0 {
 		return nil, fmt.Errorf("whisper file contains no archives for metric: %q", name)
 	}
 
-	totalPoints := 0
-	for _, a := range w.GetArchives() {
-		totalPoints += int(a.Points)
+	// Dump one precision level at a time and write into the output slice.
+	// Its important to remember that the archive with index 0 (first archive)
+	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
+	keptPoints := []whisper.Point{}
+
+	// We want to track the max timestamp of the archives because we know it
+	// virtually represents now() and we won't have newer points.
+	var maxTs, maxTsOffset uint32
+	for i := range archives {
+		// All archives share the same maxTs, so only calculate it once.
+		if maxTs == 0 {
+			if i > 0 {
+				// If there are no points in the high-res archives, we have to bump up
+				// maxTs by the difference in retention to the next higher archive so
+				// that this point is validly in the retention for this archive. This
+				// can happen when the only points added to a whisper archive are
+				// significantly older than "Now()" at the time of writing, as happens
+				// during our e2e test.
+				maxTsOffset = archives[i-1].Retention()
+			}
+			points, err := w.DumpArchive(i)
+			if err != nil {
+				return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
+			}
+			for _, p := range points {
+				if p.Timestamp > maxTs {
+					maxTs = p.Timestamp
+				}
+			}
+		}
+	}
+	maxTs += maxTsOffset
+
+	// Also determine the boundaries between archives.
+	lowerBoundTs := make([]uint32, len(archives))
+	for i, a := range archives {
+		if maxTs < a.Retention() {
+			// very big retention, boundary would be < 0, therefore all points are
+			// covered by this archive.
+			lowerBoundTs[i] = 0
+		} else {
+			lowerBoundTs[i] = maxTs - a.Retention()
+		}
 	}
 
-	// Preallocate space for all allPoints in one slice.
-	allPoints := make([]pointWithPrecision, totalPoints)
-	pIdx := 0
-	// Dump one precision level at a time and write into the output slice.
-	for i, a := range w.GetArchives() {
-		archivePoints, err := w.DumpArchive(i)
+	// no maxTs means no points. This is not an error.
+	if maxTs == 0 {
+		return []whisper.Point{}, nil
+	}
+
+	// Iterate over archives backwards so we process oldest points first. Sort the
+	// points, then determine the slice that is between the bounds for this
+	// archive, and append those to the output array.
+	for i := len(archives) - 1; i >= 0; i-- {
+		points, err := w.DumpArchive(i)
 		if err != nil {
 			return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
 		}
-		for j, p := range archivePoints {
-			allPoints[pIdx+j] = pointWithPrecision{p, a.SecondsPerPoint}
-		}
-		pIdx += len(archivePoints)
-	}
 
-	// Points must be in time order.
-	sort.Slice(allPoints, func(i, j int) bool {
-		return allPoints[i].Timestamp < allPoints[j].Timestamp
-	})
-
-	trimmedPoints := []whisper.Point{}
-	for i := 0; i < len(allPoints); i++ {
-		// Remove all points of time = 0.
-		if allPoints[i].Timestamp == 0 {
+		if len(points) == 0 {
 			continue
 		}
-		// There might be duplicate timestamps in different archives. Take the
-		// higher-precision archive value since it's unaggregated.
-		if i > 0 && allPoints[i].Timestamp == allPoints[i-1].Timestamp {
-			if allPoints[i].secondsPerPoint == allPoints[i-1].secondsPerPoint {
-				return nil, fmt.Errorf("duplicate timestamp at same precision in archive %s: %d", name, allPoints[i].Timestamp)
+
+		// Sort this archive.
+		sort.Slice(points, func(i, j int) bool {
+			return points[i].Timestamp < points[j].Timestamp
+		})
+
+		startIdx := -1
+		endIdx := len(points) - 1
+		for j, p := range points {
+			if p.Timestamp == 0 {
+				continue
 			}
-			if allPoints[i].secondsPerPoint < allPoints[i-1].secondsPerPoint {
-				trimmedPoints[len(trimmedPoints)-1] = allPoints[i].Point
+			// Don't include any points in this archive that are older than the
+			// retention period.
+			if p.Timestamp <= lowerBoundTs[i] {
+				continue
 			}
-			// If the previous point is higher precision, just continue.
-			continue
+			// Don't include any points in this archive that are covered in a higher
+			// resolution archive. If the other boundary is zero, it is invalid
+			// so we keep the point.
+			if i > 0 && p.Timestamp > lowerBoundTs[i-1] {
+				break
+			}
+			endIdx = j
+			if startIdx == -1 {
+				startIdx = j
+			}
 		}
-		trimmedPoints = append(trimmedPoints, allPoints[i].Point)
+		// if startIdx is -1, we did not find any valid points.
+		if startIdx != -1 {
+			keptPoints = append(keptPoints, points[startIdx:endIdx+1]...)
+		}
 	}
 
-	return trimmedPoints, nil
+	return keptPoints, nil
 }
 
 // ToMimirSamples converts a Whisper metric with the given name to a slice of
