@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.1.0](https://github.com/grafana/mimir-proxies/compare/mimir-proxies-v1.0.2...mimir-proxies-v1.1.0) (2023-09-28)
+
+
+### Features
+
+* add otel support for ExtractSampledTraceID ([#46](https://github.com/grafana/mimir-proxies/issues/46)) ([fe211cd](https://github.com/grafana/mimir-proxies/commit/fe211cd3587c29d42ce74245fe7a175b863aa494))
+
+
+### Bug Fixes
+
+* adjust date ranges for UTC and remove debug cruft ([#84](https://github.com/grafana/mimir-proxies/issues/84)) ([867f4a8](https://github.com/grafana/mimir-proxies/commit/867f4a8fe691cb3c6b663c8a264c9a0b2f55d66e))
+* handle timeout and unexpected eof error by returning 408 or 499 ([#64](https://github.com/grafana/mimir-proxies/issues/64)) ([5807bcd](https://github.com/grafana/mimir-proxies/commit/5807bcd690d5ca291d7d3306c90caeeab85f083d))
+* make requestLimitsMiddleware return 400 instead of 500 ([52de8c3](https://github.com/grafana/mimir-proxies/commit/52de8c3a217484194e51c7da080c7f74ca6a9d80))
+* return 500 in case of reading body failed ([6a1b562](https://github.com/grafana/mimir-proxies/commit/6a1b562e061465e484dd81345d4b45bb6cb3f6d0))
+* skip points outside of archive retention on first pass ([#82](https://github.com/grafana/mimir-proxies/issues/82)) ([b4b782c](https://github.com/grafana/mimir-proxies/commit/b4b782c385f0d4ff9db59970c4c95de6b62a7924))
+* use NewWithLogger in request_limits middleware ([#66](https://github.com/grafana/mimir-proxies/issues/66)) ([5656112](https://github.com/grafana/mimir-proxies/commit/56561125064cfca5221811f6ce6e94f390b9370c))
+
 ## [1.0.2](https://github.com/grafana/mimir-proxies/compare/mimir-proxies-v1.0.0...mimir-proxies-v1.0.2) (2023-06-23)
 
 
