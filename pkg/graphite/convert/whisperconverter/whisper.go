@@ -60,12 +60,12 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		if maxTs == 0 {
 			if i > 0 {
 				// If there are no points in the high-res archives, we have to bump up
-				// maxTs by the difference in retention to the highest archive so that
-				// this point is validly in the retention for this archive. This can
-				// happen when the only points added to a whisper archive are
+				// maxTs by the difference in retention to the next higher archive so
+				// that this point is validly in the retention for this archive. This
+				// can happen when the only points added to a whisper archive are
 				// significantly older than "Now()" at the time of writing, as happens
 				// during our e2e test.
-				maxTsOffset = archives[i].Retention() - archives[0].Retention()
+				maxTsOffset = archives[i-1].Retention()
 			}
 			points, err := w.DumpArchive(i)
 			if err != nil {
