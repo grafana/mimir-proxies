@@ -93,10 +93,10 @@ READLOOP:
 	terms := []string{}
 
 	if minTS != int64(math.MaxInt64) {
-		terms = append(terms, fmt.Sprintf("--start-date %s", time.UnixMilli(minTS).Format("2006-01-02")))
+		terms = append(terms, fmt.Sprintf("--start-date %s", time.UnixMilli(minTS).UTC().Format("2006-01-02")))
 	}
 	if maxTS != int64(math.MinInt64) {
-		terms = append(terms, fmt.Sprintf("--end-date %s", time.UnixMilli(maxTS).Format("2006-01-02")))
+		terms = append(terms, fmt.Sprintf("--end-date %s", time.UnixMilli(maxTS).UTC().Format("2006-01-02")))
 	}
 	terms = append(terms, "\n")
 	fmt.Printf(strings.Join(terms, " "))

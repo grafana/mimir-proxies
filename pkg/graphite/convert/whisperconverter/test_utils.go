@@ -1,7 +1,6 @@
 package whisperconverter
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -23,24 +22,14 @@ func CreateWhisperFile(path string, timestamps []*time.Time) error {
 	if err != nil {
 		return err
 	}
-	// defer wsp.Close()
+	defer wsp.Close()
 
 	for _, t := range timestamps {
-		fmt.Println("yes?")
 		err = wsp.Update(1.0, int(t.Unix()))
 		if err != nil {
-			fmt.Println(err)
 			return err
 		}
 	}
-
-	wsp.Close()
-
-	// wsp, err = whisper.Open(path)
-	// if err != nil {
-	// 	return err
-	// }
-	// wsp.Dump(true, false)
 
 	return nil
 }
