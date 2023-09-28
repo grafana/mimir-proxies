@@ -99,12 +99,12 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 			}
 			// Don't include any points in this archive that are past the retention
 			// period.
-			if p.Timestamp < minArchiveTs {
+			if p.Timestamp <= minArchiveTs {
 				continue
 			}
 			// Don't include any points in this archive that were covered in a higher
 			// resolution archive.
-			if p.Timestamp >= lastMinTs {
+			if p.Timestamp > lastMinTs {
 				break
 			}
 			endIdx = j

@@ -147,7 +147,7 @@ func TestExtractWhisperPoints(t *testing.T) {
 				},
 				points: [][]whisper.Point{
 					{
-						whisper.NewPoint(time.Unix(1020, 0), 20),
+						whisper.NewPoint(time.Unix(1020, 0), 20), // Skipped, this is past the lower bound of this archive.
 						whisper.NewPoint(time.Unix(1021, 0), 21),
 						whisper.NewPoint(time.Unix(1022, 0), 22),
 						whisper.NewPoint(time.Unix(1023, 0), 23),
@@ -160,7 +160,7 @@ func TestExtractWhisperPoints(t *testing.T) {
 						whisper.NewPoint(time.Unix(1030, 0), 30),
 					},
 					{
-						whisper.NewPoint(time.Unix(1009, 0), 9), // This is the lower border of this archive, this point should be kept
+						whisper.NewPoint(time.Unix(1009, 0), 9), // Skipped, this is past the lower bound of this archive.
 						whisper.NewPoint(time.Unix(1012, 0), 12),
 						whisper.NewPoint(time.Unix(1015, 0), 15),
 						whisper.NewPoint(time.Unix(1018, 0), 18),
@@ -172,7 +172,7 @@ func TestExtractWhisperPoints(t *testing.T) {
 					{
 						whisper.NewPoint(time.Unix(1000, 0), 0),
 						whisper.NewPoint(time.Unix(1006, 0), 6),
-						whisper.NewPoint(time.Unix(1009, 0), 99), // skipped because archive 1 has a point at this time
+						whisper.NewPoint(time.Unix(1009, 0), 99), // This is the upper bound of this archive
 						whisper.NewPoint(time.Unix(1012, 0), 12), // skipped
 						whisper.NewPoint(time.Unix(1018, 0), 18), // skipped
 						whisper.NewPoint(time.Unix(1024, 0), 24), // skipped
@@ -191,7 +191,7 @@ func TestExtractWhisperPoints(t *testing.T) {
 				},
 				{
 					Timestamp: 1009,
-					Value:     9,
+					Value:     99,
 				},
 				{
 					Timestamp: 1012,
@@ -204,10 +204,6 @@ func TestExtractWhisperPoints(t *testing.T) {
 				{
 					Timestamp: 1018,
 					Value:     18,
-				},
-				{
-					Timestamp: 1020,
-					Value:     20,
 				},
 				{
 					Timestamp: 1021,
