@@ -3,7 +3,6 @@ package whisperconverter
 import (
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"sort"
 	"time"
@@ -51,19 +50,24 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 	// Dump one precision level at a time and write into the output slice.
 	// Its important to remember that the archive with index 0 (first archive)
 	// has the raw data and the highest precision https://graphite.readthedocs.io/en/latest/whisper.html#archives-retention-and-precision
-	var keptPoints []whisper.Point
+	keptPoints := []whisper.Point{}
 
 	// We want to track the max timestamp of the archives because we know it
-	// virtually represents now() and we wont have newer points. Then the min
-	// timestamp of the archive would be maxTs - each archive retention.
-	var maxTs uint32
+	// virtually represents now() and we won't have newer points.
+	var maxTs, maxTsOffset uint32
 
-	// Also determine the lower bound of each archive, which is the upper bound of
-	// the next archive.
-	minArchiveTs := make([]uint32, len(archives))
-	for i, a := range archives {
-		// All archives share the same maxArchiveTs, so only calculate it once.
+	// Also determine the boundaries between archives.
+	lowerBoundTs := make([]uint32, len(archives))
+	for i := range archives {
+		fmt.Println("retention", archives[i].Retention())
+		// All archives share the same maxTs, so only calculate it once.
 		if maxTs == 0 {
+			if i > 0 {
+				// If there are no points in the high-res archives, we have to bump up maxTs
+				// by the retention of the next-highest archive so that this point is validly
+				// in the retention for this archive.
+				maxTsOffset = archives[i].Retention() - archives[0].Retention()
+			}
 			points, err := w.DumpArchive(i)
 			if err != nil {
 				return nil, fmt.Errorf("failed to dump archive %d from whisper metric %s", i, name)
@@ -74,12 +78,27 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 				}
 			}
 		}
+	}
+	fmt.Println("max ts", maxTs, maxTsOffset)
+	maxTs += maxTsOffset
+	fmt.Println("max ts adjusted", maxTs)
 
-		if maxTs < a.Retention() { // very big retention, invalid.
-			minArchiveTs[i] = uint32(math.MaxUint32)
+	for i, a := range archives {
+		if maxTs < a.Retention() {
+			// very big retention, boundary would be < 0, therefore all points are
+			// covered by this archive.
+			lowerBoundTs[i] = 0
 		} else {
-			minArchiveTs[i] = maxTs - a.Retention()
+			fmt.Println("lower bound is maxts-retent", maxTs, a.Retention())
+			lowerBoundTs[i] = maxTs - a.Retention()
 		}
+	}
+
+	fmt.Println("bounds", lowerBoundTs)
+
+	// no maxTs means no points. This is not an error.
+	if maxTs == 0 {
+		return []whisper.Point{}, nil
 	}
 
 	// Iterate over archives backwards so we process oldest points first. Sort the
@@ -103,17 +122,21 @@ func ReadPoints(w Archive, name string) ([]whisper.Point, error) {
 		startIdx := -1
 		endIdx := len(points) - 1
 		for j, p := range points {
+			fmt.Println("point", p.Timestamp, p.Value)
 			if p.Timestamp == 0 {
 				continue
 			}
 			// Don't include any points in this archive that are older than the
 			// retention period.
-			if p.Timestamp <= minArchiveTs[i] {
+			if p.Timestamp <= lowerBoundTs[i] {
+				fmt.Println("older than lower bound", p.Timestamp, lowerBoundTs[i], p.Value)
 				continue
 			}
 			// Don't include any points in this archive that are covered in a higher
-			// resolution archive.
-			if i > 0 && p.Timestamp > minArchiveTs[i-1] {
+			// resolution archive. If the other boundary is zero, it is invalid
+			// so we keep the point.
+			if i > 0 && p.Timestamp > lowerBoundTs[i-1] {
+				fmt.Println("too new for lower bound, skip", p.Timestamp, lowerBoundTs[i-1])
 				break
 			}
 			endIdx = j

@@ -74,6 +74,32 @@ func TestExtractWhisperPoints(t *testing.T) {
 			},
 		},
 		{
+			name:       "simple series, large retention",
+			metricName: "mymetric",
+			archive: &testArchive{
+				infos: []whisper.ArchiveInfo{
+					simpleArchiveInfo(6000, 1),
+					simpleArchiveInfo(6000, 60),
+				},
+				points: [][]whisper.Point{
+					{
+						whisper.NewPoint(time.Unix(1000, 0), 1),
+					},
+					// None of the points in this archive are valid because all points
+					// are covered by the first archive.
+					{
+						whisper.NewPoint(time.Unix(940, 0), 2),
+					},
+				},
+			},
+			want: []whisper.Point{
+				{
+					Timestamp: 1000,
+					Value:     1,
+				},
+			},
+		},
+		{
 			name:       "multiple series, different intervals, zeros, duplicate points",
 			metricName: "mymetric",
 			archive: &testArchive{
@@ -248,22 +274,27 @@ func TestExtractWhisperPoints(t *testing.T) {
 			},
 		},
 		{
+			name:       "test retention when archives are empty",
+			metricName: "mymetric",
+			archive: &testArchive{
+				infos: []whisper.ArchiveInfo{
+					simpleArchiveInfo(10, 1),
+					simpleArchiveInfo(7, 3),
+					simpleArchiveInfo(6, 6),
+				},
+				points: [][]whisper.Point{
+					{},
+					{},
+					{},
+				},
+			},
+			want: []whisper.Point{},
+		},
+		{
 			name:       "test retention when first archives are empty",
 			metricName: "mymetric",
 			archive: &testArchive{
 				infos: []whisper.ArchiveInfo{
-					// This is what the test will define
-					// Maxts                        Mints
-					// 1030     1020     1009     994
-					//  []
-					//  [                  ]
-					//  [                           ]
-					// And this is what the test will expect
-					// 1030     1020     1009     994
-					//  [XXXXXXXXX]
-					//  [          XXXXXXXXX]
-					//  [                   XXXXXXXX]
-
 					simpleArchiveInfo(10, 1),
 					simpleArchiveInfo(7, 3),
 					simpleArchiveInfo(6, 6),
@@ -271,22 +302,51 @@ func TestExtractWhisperPoints(t *testing.T) {
 				points: [][]whisper.Point{
 					{},
 					{
-						whisper.NewPoint(time.Unix(1009, 0), 9), // This is the lower border of this archive, this point should be kept
+						whisper.NewPoint(time.Unix(1009, 0), 9),
 					},
 					{
 						whisper.NewPoint(time.Unix(1009, 0), 99), // skipped because archive 1 has a point at this time
-						whisper.NewPoint(time.Unix(975, 0), 12),
+						whisper.NewPoint(time.Unix(998, 0), 12),
 					},
 				},
 			},
 			want: []whisper.Point{
 				{
-					Timestamp: 975,
+					Timestamp: 998,
 					Value:     12,
 				},
 				{
 					Timestamp: 1009,
 					Value:     9,
+				},
+			},
+		},
+		{
+			name:       "test retention when first archives are empty",
+			metricName: "mymetric",
+			archive: &testArchive{
+				infos: []whisper.ArchiveInfo{
+					simpleArchiveInfo(10, 1),
+					simpleArchiveInfo(7, 3),
+					simpleArchiveInfo(6, 6),
+				},
+				points: [][]whisper.Point{
+					{},
+					{},
+					{
+						whisper.NewPoint(time.Unix(1009, 0), 99), // skipped because archive 1 has a point at this time
+						whisper.NewPoint(time.Unix(1000, 0), 12),
+					},
+				},
+			},
+			want: []whisper.Point{
+				{
+					Timestamp: 1000,
+					Value:     12,
+				},
+				{
+					Timestamp: 1009,
+					Value:     99,
 				},
 			},
 		},
