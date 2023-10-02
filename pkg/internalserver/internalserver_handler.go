@@ -47,10 +47,8 @@ func Handler(logger log.Logger, cfg Config) (run func() error, stop func(error))
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 
-	mux.Handle("/healthz", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		rw.WriteHeader(http.StatusOK)
-		_, _ = rw.Write([]byte("ok"))
-	}))
+	signalHandler := newSignalHandler(cfg.ServerGracefulShutdownTimeout, logger)
+	mux.Handle("/healthz", http.HandlerFunc(NewReadinessHandler(signalHandler, logger)))
 
 	// Pprof.
 	mux.HandleFunc("/debug/pprof/", pprof.Index)
