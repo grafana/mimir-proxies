@@ -26,8 +26,8 @@ type serverSignalHandler struct {
 	logger        log.Logger
 }
 
-func (dh *serverSignalHandler) Loop() {
-	dh.ready.Store(true)
+func (sh *serverSignalHandler) Loop() {
+	sh.ready.Store(true)
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -35,28 +35,28 @@ func (dh *serverSignalHandler) Loop() {
 
 	for {
 		select {
-		case <-dh.quit:
+		case <-sh.quit:
 			return
 
 		case <-sigs:
-			level.Info(dh.logger).Log("msg", "=== received SIGINT/SIGTERM ===", "sleep", dh.shutdownDelay)
+			level.Info(sh.logger).Log("msg", "=== received SIGINT/SIGTERM ===", "sleep", sh.shutdownDelay)
 
 			// Not ready anymore.
-			dh.ready.Store(false)
-			if dh.shutdownDelay > 0 {
-				time.Sleep(dh.shutdownDelay)
+			sh.ready.Store(false)
+			if sh.shutdownDelay > 0 {
+				time.Sleep(sh.shutdownDelay)
 			}
 
-			level.Info(dh.logger).Log("msg", "shutting down")
+			level.Info(sh.logger).Log("msg", "shutting down")
 			return
 		}
 	}
 }
 
-func (dh *serverSignalHandler) Stop() {
-	close(dh.quit)
+func (sh *serverSignalHandler) Stop() {
+	close(sh.quit)
 }
 
-func (dh *serverSignalHandler) Ready() bool {
-	return dh.ready.Load()
+func (sh *serverSignalHandler) Ready() bool {
+	return sh.ready.Load()
 }
