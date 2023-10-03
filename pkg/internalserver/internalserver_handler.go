@@ -24,6 +24,8 @@ type Config struct {
 	HTTPListenAddress             string        `yaml:"http_listen_address"`
 	HTTPListenPort                int           `yaml:"http_listen_port"`
 	ServerGracefulShutdownTimeout time.Duration `yaml:"graceful_shutdown_timeout"`
+
+	ReadinessProvider ReadinessProvider `yaml:"-"`
 }
 
 // RegisterFlags adds the flags required to config this to the given FlagSet
@@ -47,8 +49,7 @@ func Handler(logger log.Logger, cfg Config) (run func() error, stop func(error))
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 
-	signalHandler := newSignalHandler(cfg.ServerGracefulShutdownTimeout, logger)
-	mux.Handle("/healthz", http.HandlerFunc(NewReadinessHandler(signalHandler, logger)))
+	mux.Handle("/healthz", http.HandlerFunc(NewReadinessHandler(cfg.ReadinessProvider, logger)))
 
 	// Pprof.
 	mux.HandleFunc("/debug/pprof/", pprof.Index)
