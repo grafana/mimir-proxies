@@ -153,9 +153,12 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string, tracer open
 	}
 	app.Server = srv
 
+	signalHandler := stopsignal.NewSignalHandler(cfg.InternalServerConfig.ServerGracefulShutdownTimeout, logger)
+	cfg.InternalServerConfig.ReadinessProvider = signalHandler
+
 	app.Group.Add(app.Server.Handler())
 	app.Group.Add(internalserver.Handler(logger, cfg.InternalServerConfig))
-	app.Group.Add(stopsignal.Handler(logger, syscall.SIGTERM, syscall.SIGINT))
+	app.Group.Add(signalHandler.Handler(syscall.SIGTERM, syscall.SIGINT))
 
 	if err := registerVersionMetrics(reg, cfg.ServiceName, metricPrefix); err != nil {
 		return app, err
