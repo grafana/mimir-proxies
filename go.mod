@@ -30,7 +30,7 @@ require (
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	github.com/weaveworks/common v0.0.0-20230119144549-0aaa5abd1e63
 	go.opentelemetry.io/otel v1.19.0
-	go.opentelemetry.io/otel/bridge/opentracing v1.14.0
+	go.opentelemetry.io/otel/bridge/opentracing v1.19.0
 	go.opentelemetry.io/otel/sdk v1.19.0
 	go.opentelemetry.io/otel/trace v1.19.0
 	golang.org/x/net v0.17.0
