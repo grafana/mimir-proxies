@@ -14,10 +14,10 @@ the matcher list.
 
 ## blocks-by-year.sh
 
-Simple script that operates on the current directory, which should contain tsdb
-blocks.  For each block, finds the max date of the block using block-date.jq,
-and then parses out the year and moves that block into a directory named for
-that year.
+Script that takes a directory which should contain tsdb blocks. For each block,
+finds the max date of the block using block-date.jq, and then parses out the
+year and moves that block into a directory named for that year. Assumes that
+block-date.jq is in the same folder as blocks-by-year.sh.
 
 ## block-rewrite.sh
 
@@ -31,4 +31,5 @@ instance, metric_list.py).
 Usage: thanos-parallel.sh [workdir] [todelete yaml file]
 
 Operates on a workdir containing tsdb blocks. Will run thanos in parallel,
-deleting series according to the todelete file.
+deleting series according to the todelete file. Assumes that block-rewrite.sh is
+in the same directory.
