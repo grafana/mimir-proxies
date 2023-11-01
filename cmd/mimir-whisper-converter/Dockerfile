@@ -17,6 +17,15 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
   && unzip awscliv2.zip \
   && ./aws/install
 
+RUN apt install -y nano less jq
+
+RUN wget https://github.com/thanos-io/thanos/releases/download/v0.32.5/thanos-0.32.5.linux-amd64.tar.gz \
+  && tar xfvz thanos-0.32.5.linux-amd64.tar.gz \
+  && cp thanos-0.32.5.linux-amd64/thanos /usr/local/bin/
+
+RUN wget https://github.com/grafana/mimir/releases/download/mimir-2.10.3/mimirtool_2.10.3_amd64.deb \
+  && dpkg -i mimirtool_2.10.3_amd64.deb
+
 WORKDIR /app
 USER app
 
@@ -26,5 +35,6 @@ ENV PATH=$PATH:/app/opt/whisper/scripts-3.10
 
 COPY dist/mimir-whisper-converter /app/mimir-whisper-converter
 COPY scripts/whisper /app/bin
+COPY scripts/block-rewriting /app/bin
 
 CMD ["tail", "-f", "/dev/null"]
