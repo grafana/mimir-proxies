@@ -1,17 +1,51 @@
 #!/bin/bash
 
-if [ "$3"x == "x" ] ; then
-  echo "need workdir, tmp parent dir, to-delete yaml"
+if [ "$5"x == "x" ] ; then
+  echo "need workdir, tmp parent dir, dest dir, to-delete yaml, number of parallel execs"
   exit 1
 fi
 
 workdir="$1"
 tmpparent="$2"
-todelete="$3"
+destdir="$3"
+todelete="$4"
+parallel="$5"
 rundir=$(dirname $0)
+
+if [ ! -d $tmpparent ] ; then
+  echo "tmpparent invalid: $tmpparent"
+  exit 1
+fi
+
+if [ ! -d $destdir ] ; then
+  echo "destdir invalid: $destdir"
+  exit 1
+fi
+
+tmpdir=$(mktemp -d -p $tmpparent)
+
+# Cleanup from previous runs: remove tmpparent
+rm -rf $tmpparent/*
+
+# Delete processed old blocks
+thanos tools bucket cleanup --delete-delay=0h --objstore.config "
+type: FILESYSTEM
+config:
+  directory: $workdir/
+"
+
+# Move finished new blocks to dest -- this is custom for this backup process,
+# not generalizable.
+for d in "$workdir"/0* ; do
+  processed=$(cat $d/meta.json | grep deletions_applied | wc -l)
+  if [ $processed -gt 0 ] ; then
+    echo Moving finished block $d
+    mv $d "$destdir"/
+  fi
+done
 
 # List blocks in the directory, randomly sorted to spread the work around.
 blocks=$(ls -1 $workdir | grep 01 | sort -R)
 
-# Split the list into chunks of 10 and run 8 instances of thanos at a time.
-echo $blocks | xargs -P 16 -n 10 $rundir/block-rewrite.sh $workdir $tmpparent $todelete
+# Split the list into chunks of 1 and run $parallel instances of thanos at a time.
+echo $blocks | xargs -P $parallel -n 1 $rundir/block-rewrite.sh $workdir $tmpparent $todelete
