@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20221031212613-62deef7fc822
-	github.com/felixge/httpsnoop v1.0.3
+	github.com/felixge/httpsnoop v1.0.4
 	github.com/go-graphite/go-whisper v0.0.0-20230316154527-2337c74b5007
 	github.com/go-kit/log v0.2.1
 	github.com/gogo/protobuf v1.3.2
