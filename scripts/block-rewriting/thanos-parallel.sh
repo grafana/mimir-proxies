@@ -48,4 +48,4 @@ done
 blocks=$(ls -1 $workdir | grep 01 | sort -R)
 
 # Split the list into chunks of 1 and run $parallel instances of thanos at a time.
-echo $blocks | xargs -P $parallel -n 1 $rundir/block-rewrite.sh $workdir $tmpparent $todelete
+echo $blocks | xargs -P $parallel -n 10 $rundir/block-rewrite.sh $workdir $tmpparent $todelete
