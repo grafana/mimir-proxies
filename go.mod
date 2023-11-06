@@ -10,7 +10,7 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.3
 	github.com/golang/snappy v0.0.4
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/grafana/dskit v0.0.0-20230413140051-dcfeb210d90e
 	github.com/grafana/metrictank v1.0.1-0.20230406204819-309ba74749c4
 	github.com/grafana/mimir v0.0.0-20230419142232-1caeada53bf6
