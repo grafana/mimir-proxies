@@ -34,6 +34,14 @@ config:
   directory: $workdir/
 "
 
+# Remove empty blocks
+for d in $(ls -1 $workdir/ | grep 01*) ; do
+  if [ ! -d $workdir/$d/chunks ] ; then
+    echo "Deleting empty block $d"
+    rm -rf $workdir/$d
+  fi
+done
+
 # Move finished new blocks to dest -- this is custom for this backup process,
 # not generalizable.
 for d in "$workdir"/0* ; do
