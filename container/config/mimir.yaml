@@ -1,8 +1,3 @@
-# Do not use this configuration in production.
-# It is for demonstration purposes only.
-# Run Mimir in single process mode, with all components running in 1 process.
-target: all,alertmanager,overrides-exporter
-
 # Configure Mimir to use Minio as object storage backend.
 common:
   storage:
@@ -14,15 +9,15 @@ common:
       insecure: true
       bucket_name: mimir
 
+ingester:
+  ring:
+    replication_factor: 1
+
 # Blocks storage requires a prefix when using a common object storage bucket.
 blocks_storage:
   storage_prefix: blocks
   tsdb:
     dir: /data/ingester
-
-# Use memberlist, a gossip-based protocol, to enable the 3 Mimir replicas to communicate
-memberlist:
-  join_members: [mimir-server-1, mimir-server-2, mimir-server-3]
 
 ruler:
   rule_path: /data/ruler
@@ -34,8 +29,6 @@ ruler:
 
 alertmanager:
   data_dir: /data/alertmanager
-  fallback_config_file: /etc/alertmanager-fallback-config.yaml
-  external_url: http://localhost:9009/alertmanager
 
 server:
   log_level: warn
