@@ -8,7 +8,7 @@ RUN apk add bash git \
       && cd mimir-proxies \
       && bash ./scripts/compile_commands.sh
 
-FROM ${IMAGE_BASE} as minir-proxy
+FROM ${IMAGE_BASE} as mimir-proxy
 
 USER root
 

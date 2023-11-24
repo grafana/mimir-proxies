@@ -20,15 +20,16 @@ if command -v "${PROXY_COMMAND}" >/dev/null; then
   if [[ ${#} -gt 1 ]]; then
     set -- $PROXY_COMMAND"${@//$PROXY_TYPE/}"
   else
-    MIMIR_API="${PROXY_ENTRY_PROTOCOL:-http}://${PROXY_ENTRY_SERVER:-mimir}:${POXY_ENTRY_PORT:-9009}/api"
+    MIMIR_API="${PROXY_ENTRY_PROTOCOL:-http}://${PROXY_ENTRY_SERVER:-mimir}:${POXY_ENTRY_PORT:-9009}"
     set -- $PROXY_COMMAND \
                           -server.http-listen-address=${PROXY_LISTENER_ADDRESS:-0.0.0.0} \
                           -server.http-listen-port=${PROXY_LISTENER_PORT:-8009} \
                           -server.path-prefix="${PROXY_PREFIX:-"/${PROXY_TYPE}/"}" \
                           -auth.enable="${PROXY_AUTH:-false}" \
                           -memcached-server "${PROXY_MEMCACHE_SERVER:-memcached:11211}" \
-                          -write-endpoint "${MIMIR_API}/prom/push" \
-                          -query-endpoint "${MIMIR_API}/prom"
+                          -write-endpoint "${MIMIR_API}/api/v1/push" \
+                          -query-endpoint "${MIMIR_API}/prometheus" \
+                          -v=${PROXY_VERBOSITY:-0}
   fi
   echo "Running:"
   echo "$@"
