@@ -10,7 +10,6 @@ services:
     hostname: mimir-datadog-proxy
     environment:
       - PROXY_TYPE=datadog
-        #- PROXY_ENTRY_SERVER=load-balancer
       - PROXY_VERBOSITY=15
       - PROXY_ENTRY_SERVER=mimir
       - POXY_ENTRY_PORT=8080
@@ -36,7 +35,7 @@ services:
     hostname: mimir-debug-proxy
     environment:
       - PROXY_TYPE=datadog
-      - PROXY_ENTRY_SERVER=load-balancer
+      - PROXY_ENTRY_SERVER=mimir
       - PROXY_VERBOSITY=15
       - PROXY_MEMCACHE_SERVER="mimir-datadog-proxy:11211"
     volumes:
@@ -47,6 +46,7 @@ services:
     depends_on:
       mimir-datadog-proxy:
         condition: service_started
+    profiles: ["testing"]
 
   mimir-graphite-proxy:
     <<: *mimir_proxy
@@ -68,7 +68,7 @@ services:
        #- DD_APM_NON_LOCAL_TRAFFIC=true
      - DD_SYSTEM_PROBE_NETWORK_ENABLED=true
      - DD_PROCESS_AGENT_ENABLED=true
-     - DD_APM_RECEIVER_SOCKET=/opt/datadog/apm/inject/run/apm.socket
+       #- DD_APM_RECEIVER_SOCKET=/opt/datadog/apm/inject/run/apm.socket
      - DD_DOGSTATSD_SOCKET=/opt/datadog/apm/inject/run/dsd.socket
      - DD_ADDITIONAL_ENDPOINTS=${DD_ADDITIONAL_ENDPOINTS}
      - DD_LOGS_ENABLED=true
