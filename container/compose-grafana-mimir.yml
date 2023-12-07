@@ -45,8 +45,8 @@ services:
   mimir:
     image: grafana/mimir:latest
     command: ["-config.file=/etc/mimir.yaml"]
-    container_name: minir
-    hostname: minir
+    container_name: mimir
+    hostname: mimir
     depends_on:
       - minio
     volumes:
