@@ -41,7 +41,7 @@ function cleanup() {
   "
 
   # Remove empty blocks
-  for d in $(ls -1 $workdir/ | grep 01*) ; do
+  for d in $(ls -1 $workdir/ | grep 01) ; do
     if [ ! -d $workdir/$d/chunks ] ; then
       echo "Deleting empty block $d"
       rm -rf $workdir/$d
