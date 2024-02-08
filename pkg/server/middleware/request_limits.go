@@ -33,7 +33,7 @@ func NewRequestLimitsMiddleware(maxRequestBodySize int64, logger log.Logger) *Re
 
 func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log, _ := spanlogger.NewWithLogger(r.Context(), l.logger, "middleware.RequestLimits.Wrap")
+		log, ctx := spanlogger.NewWithLogger(r.Context(), l.logger, "middleware.RequestLimits.Wrap")
 		defer log.Span.Finish()
 
 		reader := io.LimitReader(r.Body, int64(l.maxRequestBodySize)+1)
@@ -62,7 +62,7 @@ func (l RequestLimits) Wrap(next http.Handler) http.Handler {
 
 		r.Body = io.NopCloser(bytes.NewBuffer(body))
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
