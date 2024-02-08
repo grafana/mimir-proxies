@@ -29,10 +29,10 @@ require (
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	github.com/weaveworks/common v0.0.0-20230119144549-0aaa5abd1e63
-	go.opentelemetry.io/otel v1.19.0
+	go.opentelemetry.io/otel v1.23.1
 	go.opentelemetry.io/otel/bridge/opentracing v1.19.0
 	go.opentelemetry.io/otel/sdk v1.19.0
-	go.opentelemetry.io/otel/trace v1.19.0
+	go.opentelemetry.io/otel/trace v1.23.1
 	golang.org/x/net v0.19.0
 	google.golang.org/grpc v1.53.0
 )
@@ -59,7 +59,7 @@ require (
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
+	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/analysis v0.21.4 // indirect
 	github.com/go-openapi/errors v0.20.3 // indirect
@@ -132,7 +132,7 @@ require (
 	go.opentelemetry.io/collector/pdata v1.0.0-rc7 // indirect
 	go.opentelemetry.io/collector/semconv v0.73.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.44.0 // indirect
-	go.opentelemetry.io/otel/metric v1.19.0 // indirect
+	go.opentelemetry.io/otel/metric v1.23.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/goleak v1.2.1 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
