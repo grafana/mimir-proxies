@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/grafana/mimir-proxies/compare/mimir-proxies-v1.0.2...mimir-proxies-v1.1.0) (2024-03-14)
+
+
+### Features
+
+* internal server becomes not ready when stop signal is received ([#79](https://github.com/grafana/mimir-proxies/pull/79))
+* build from go 1.21 ([#132](https://github.com/grafana/mimir-proxies/pull/132))
+
 ## [1.1.0](https://github.com/grafana/mimir-proxies/compare/mimir-proxies-v1.0.2...mimir-proxies-v1.1.0) (2023-09-28)
 
 
