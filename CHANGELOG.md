@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.1](https://github.com/grafana/mimir-proxies/compare/mimir-proxies-v1.0.2...mimir-proxies-v1.1.0) (2024-03-19)
+## [1.1.1](https://github.com/grafana/mimir-proxies/compare/mimir-proxies-v1.0.2...mimir-proxies-v1.1.0) (2024-03-14)
 
 
 ### Features
