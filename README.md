@@ -22,27 +22,8 @@ We welcome issues/PRs if you have any suggestions or contributions for new proxi
 
 ## Releasing
 
-Releasing is done manually, and is based on the scripts that Mimir uses.
-Releases will appear in the github project for mimir-proxies.
+Releasing should happen semi-automatically through goreleaser and github actions.
 
-Currently the release configuration only builds the mimir-whisper-converter, not
-all of the commands.
-
-1. Increment the version number in VERSION.
-2. Add a heading to CHANGELOG.md to describe the major changes.
-3. Create a release branch: `git checkout -b release-$(cat VERSION)`
-4. Commit changes.
-5. run `./scripts/release/tag-release.sh` to sign and tag the branch.
-6. run `./scripts/release/create-draft-release.sh`.
-7. Go to the link printed at the end of the build and upload, and check that the
-   release makes sense.
-8. Either fix it, or click Edit and Publish the release.
-9. Merge the release PR into main
-
-If you run into problems with the tagged release, you can delete it. You'll need
-to do that both locally and remotely:
-
-```sh
-git tag -d mimir-proxies-$(cat VERSION)
-git push --delete origin mimir-proxies-$(cat VERSION)
-```
+On every push to main a github action called `Run Release Please` will run. It will draft the next release and create
+a pull request like [this one](https://github.com/grafana/mimir-proxies/pull/136) updating the CHANGELOG. On merge it
+will publish the release and attach the binaries to it.
