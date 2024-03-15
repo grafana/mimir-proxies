@@ -22,6 +22,8 @@ We welcome issues/PRs if you have any suggestions or contributions for new proxi
 
 ## Releasing
 
-Releasing should happen automatically through goreleaser and github actions.
+Releasing should happen semi-automatically through goreleaser and github actions.
 
-On every push to main a github action called `Run Release Please` will run. It will draft the next release with the new built artifacts attached to it.
+On every push to main a github action called `Run Release Please` will run. It will draft the next release and create
+a pull request like [this one](https://github.com/grafana/mimir-proxies/pull/136) updating the CHANGELOG. On merge it
+will publish the release and attach the binaries to it.
