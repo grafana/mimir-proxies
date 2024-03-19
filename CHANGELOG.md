@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/grafana/mimir-proxies/compare/v1.1.1...v1.1.2) (2024-03-19)
+
+
+### Bug Fixes
+
+* fix release process ([#142](https://github.com/grafana/mimir-proxies/issues/142)) ([d185e18](https://github.com/grafana/mimir-proxies/commit/d185e1883b5bbe60e5366eb19772f14e51b807b5))
+
 ## [1.1.1](https://github.com/grafana/mimir-proxies/compare/mimir-proxies-v1.0.2...mimir-proxies-v1.1.0) (2024-03-14)
 
 
