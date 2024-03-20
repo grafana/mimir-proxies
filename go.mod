@@ -8,7 +8,7 @@ require (
 	github.com/go-graphite/go-whisper v0.0.0-20230316154527-2337c74b5007
 	github.com/go-kit/log v0.2.1
 	github.com/gogo/protobuf v1.3.2
-	github.com/golang/protobuf v1.5.3
+	github.com/golang/protobuf v1.5.4
 	github.com/golang/snappy v0.0.4
 	github.com/gorilla/mux v1.8.1
 	github.com/grafana/dskit v0.0.0-20230413140051-dcfeb210d90e
