@@ -25,7 +25,7 @@ require (
 	github.com/prometheus/common v0.45.0
 	github.com/prometheus/prometheus v1.8.2-0.20220620125440-d7e7b8e04b5e
 	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	github.com/weaveworks/common v0.0.0-20230119144549-0aaa5abd1e63
@@ -120,7 +120,7 @@ require (
 	github.com/sercand/kuberesolver v2.4.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/thanos-io/objstore v0.0.0-20230201072718-11ffbc490204 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	github.com/weaveworks/promrus v1.2.0 // indirect
