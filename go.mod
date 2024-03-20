@@ -21,8 +21,8 @@ require (
 	github.com/opentracing-contrib/go-stdlib v1.0.0
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.17.0
-	github.com/prometheus/common v0.45.0
+	github.com/prometheus/client_golang v1.19.0
+	github.com/prometheus/common v0.50.0
 	github.com/prometheus/prometheus v1.8.2-0.20220620125440-d7e7b8e04b5e
 	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b
 	github.com/stretchr/testify v1.8.4
@@ -33,7 +33,7 @@ require (
 	go.opentelemetry.io/otel/bridge/opentracing v1.24.0
 	go.opentelemetry.io/otel/sdk v1.24.0
 	go.opentelemetry.io/otel/trace v1.24.0
-	golang.org/x/net v0.19.0
+	golang.org/x/net v0.22.0
 	google.golang.org/grpc v1.53.0
 )
 
@@ -98,7 +98,6 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/miekg/dns v1.1.53 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -112,10 +111,10 @@ require (
 	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/alertmanager v0.25.1-0.20230119163903-f59460bfd4bf // indirect
-	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
+	github.com/prometheus/client_model v0.6.0 // indirect
 	github.com/prometheus/common/sigv4 v0.1.0 // indirect
 	github.com/prometheus/exporter-toolkit v0.9.1 // indirect
-	github.com/prometheus/procfs v0.11.1 // indirect
+	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 // indirect
 	github.com/sercand/kuberesolver v2.4.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
@@ -137,12 +136,12 @@ require (
 	go.uber.org/goleak v1.2.1 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/oauth2 v0.12.0 // indirect
+	golang.org/x/oauth2 v0.18.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
