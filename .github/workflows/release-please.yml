@@ -9,7 +9,7 @@ permissions:
   repository-projects: read
 
 env:
-  DEFAULT_GO_VERSION: 1.20.5
+  DEFAULT_GO_VERSION: 1.21
 
 name: Run Release Please
 jobs:
@@ -19,20 +19,39 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
-          release-type: go
           command: manifest
-          token: ${{secrets.GITHUB_TOKEN}}
+          token: ${{ secrets.GITHUB_TOKEN }}
           default-branch: main
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
+      release_tag_sha: ${{ steps.release.outputs.release_tag_sha }}
       release_tag_name: ${{ steps.release.outputs.tag_name }}
-      release_title: >
-        ${{ format('mimir-proxies: v{0}.{1}.{2}', steps.release.outputs.major, steps.release.outputs.minor, steps.release.outputs.patch) }}
-  call-workflow-build-artifacts:
+
+  # The docs say that release-please is supposed to tag releases automatically,
+  # but for some reason that never happens, so we do it manually.
+  tag-release:
     needs: release-please
+    if: ${{ needs.release-please.outputs.releases_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        # Fetch all history for all tags and branches.
+        # Needed for the releaser to know what version to tag.
+        with:
+          fetch-depth: 0
+      - name: Tag the created release
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git tag ${{ needs.release-please.outputs.release_tag_name }} ${{ needs.release-please.outputs.release_tag_sha }} -m ${{ needs.release-please.outputs.release_tag_name }}
+          git push origin ${{ needs.release-please.outputs.release_tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  call-workflow-build-artifacts:
+    needs: [release-please, tag-release]
     if: ${{ needs.release-please.outputs.releases_created }}
     uses: ./.github/workflows/build-artifacts.yml
     with:
-      release_tag_name:  ${{ needs.release-please.outputs.release_tag_name }}
-      release_title:  ${{ needs.release-please.outputs.release_title }}
+      release_tag_name: ${{ needs.release-please.outputs.release_tag_name }}
     secrets: inherit

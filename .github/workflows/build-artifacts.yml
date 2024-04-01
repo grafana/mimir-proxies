@@ -4,7 +4,9 @@ on:
       release_tag_name:
         required: true
         type: string
-      release_title:
+  workflow_dispatch: # for manual testing
+    inputs:
+      release_tag_name:
         required: true
         type: string
 
@@ -14,7 +16,7 @@ permissions:
   repository-projects: read
 
 env:
-  DEFAULT_GO_VERSION: 1.20.5
+  DEFAULT_GO_VERSION: 1.21
 
 name: Build Artifacts
 jobs:
@@ -37,18 +39,19 @@ jobs:
         uses: goreleaser/goreleaser-action@v4
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           distribution: goreleaser
           version: latest
-          args: release --snapshot --clean
+          args: release --skip=publish,announce --clean
 
       - name: Bundle release assets
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           append_body: true
-          tag_name: ${{ inputs.release_tag_name }}
-          name: ${{ inputs.release_title }}
+          tag_name:  ${{ inputs.release_tag_name }}
+          name:  ${{ inputs.release_tag_name }}
           files: |
             README.md
             CHANGELOG.md
