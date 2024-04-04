@@ -33,7 +33,7 @@ require (
 	go.opentelemetry.io/otel/bridge/opentracing v1.24.0
 	go.opentelemetry.io/otel/sdk v1.24.0
 	go.opentelemetry.io/otel/trace v1.24.0
-	golang.org/x/net v0.22.0
+	golang.org/x/net v0.23.0
 	google.golang.org/grpc v1.53.0
 )
 
