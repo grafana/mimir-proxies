@@ -31,7 +31,7 @@ require (
 	github.com/weaveworks/common v0.0.0-20230119144549-0aaa5abd1e63
 	go.opentelemetry.io/otel v1.27.0
 	go.opentelemetry.io/otel/bridge/opentracing v1.27.0
-	go.opentelemetry.io/otel/sdk v1.26.0
+	go.opentelemetry.io/otel/sdk v1.27.0
 	go.opentelemetry.io/otel/trace v1.27.0
 	golang.org/x/net v0.25.0
 	google.golang.org/grpc v1.53.0
