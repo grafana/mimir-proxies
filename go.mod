@@ -22,7 +22,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.1
-	github.com/prometheus/common v0.53.0
+	github.com/prometheus/common v0.54.0
 	github.com/prometheus/prometheus v1.8.2-0.20220620125440-d7e7b8e04b5e
 	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b
 	github.com/stretchr/testify v1.9.0
@@ -111,7 +111,7 @@ require (
 	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/alertmanager v0.25.1-0.20230119163903-f59460bfd4bf // indirect
-	github.com/prometheus/client_model v0.6.0 // indirect
+	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common/sigv4 v0.1.0 // indirect
 	github.com/prometheus/exporter-toolkit v0.9.1 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
@@ -139,15 +139,14 @@ require (
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/oauth2 v0.18.0 // indirect
+	golang.org/x/oauth2 v0.19.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.34.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
