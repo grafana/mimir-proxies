@@ -22,8 +22,6 @@ WORKDIR /whisper
 
 RUN python ./setup.py build
 
-RUN ls /whisper
-
 FROM python:3.10-bullseye
 
 RUN addgroup --gid 1000 app \
@@ -33,9 +31,9 @@ RUN addgroup --gid 1000 app \
 RUN apt install -y nano less jq
 
 COPY --from=build /whisper/build /app/opt/whisper
-COPY --from=build /usr/local/bin/aws /app/bin
-COPY --from=build /usr/local/bin/thanos /app/bin
-COPY --from=build /usr/local/bin/mimirtool /app/bin
+COPY --from=build /usr/local/bin/aws /app/bin/
+COPY --from=build /usr/local/bin/thanos /app/bin/
+COPY --from=build /usr/local/bin/mimirtool /app/bin/
 
 WORKDIR /app
 USER app
