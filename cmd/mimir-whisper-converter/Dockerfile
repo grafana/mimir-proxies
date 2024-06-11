@@ -24,11 +24,11 @@ RUN python ./setup.py build
 
 FROM python:3.10-bullseye
 
-RUN apt install -y nano less jq
-
 RUN addgroup --gid 1000 app \
   && adduser --uid 1000 --home /app --gid 1000 --system app \
   && apt update && apt -y --no-install-recommends install prometheus vim groff
+
+RUN apt install -y nano less jq
 
 WORKDIR /app
 USER app
