@@ -1,3 +1,4 @@
+# build image from top of repo with with: docker build . -f cmd/mimir-whisper-converter/Dockerfile
 FROM python:3.10-bullseye AS build
 
 # Graphite whisper tools
