@@ -5,15 +5,17 @@ package errorx
 // test in errors_test.go.
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 
 	"google.golang.org/grpc/codes"
 
-	// nolint:staticcheck
-	protov1 "github.com/golang/protobuf/proto"
 	"github.com/grafana/mimir-proxies/pkg/errorxpb"
+
+	//nolint:staticcheck
+	protov1 "github.com/golang/protobuf/proto"
 	grpcStatus "google.golang.org/grpc/status"
 )
 
@@ -25,40 +27,42 @@ type Error interface {
 	GRPCStatusDetails() []protov1.Message
 }
 
-// FromGRPCStatus converts a Status to a native Error type. The GRPC Status
-// type is ignored in this conversion -- instead we expect ErrorDetails to
-// be included naming the correct internal type. Statuses without details
-// will be returned as Internal errors.
-func FromGRPCStatus(s *grpcStatus.Status) Error {
+// FromGRPCStatus converts a Status to either context.Canceled or a native Error
+// type. The GRPC Status type is ignored in this conversion -- instead we expect
+// ErrorDetails to be included naming the correct internal type. Statuses
+// without details will be returned as Internal errors.
+func FromGRPCStatus(s *grpcStatus.Status) error { //nolint:gocyclo
 	msg := fmt.Sprintf("grpc %v: %s", s.Code(), s.Message())
 	if s.Code() == codes.OK {
 		return nil
+	} else if s.Code() == codes.Canceled {
+		return context.Canceled
 	}
 
 	for _, di := range s.Details() {
 		if d, ok := di.(*errorxpb.ErrorDetails); ok {
 			switch d.Type {
-			case errorxpb.UNKNOWN:
+			case errorxpb.ErrorxType_UNKNOWN:
 				return Internal{Msg: "unknown errorx type specifier. " + msg}
-			case errorxpb.INTERNAL:
+			case errorxpb.ErrorxType_INTERNAL:
 				return Internal{Msg: msg}
-			case errorxpb.BAD_REQUEST:
+			case errorxpb.ErrorxType_BAD_REQUEST:
 				return BadRequest{Msg: msg}
-			case errorxpb.REQUIRES_PROXY_REQUEST:
+			case errorxpb.ErrorxType_REQUIRES_PROXY_REQUEST:
 				return RequiresProxyRequest{Msg: msg, Reason: d.Reason}
-			case errorxpb.RATE_LIMITED:
-				return RateLimited{Msg: msg}
-			case errorxpb.DISABLED:
-				return Disabled{}
-			case errorxpb.UNIMPLEMENTED:
-				return Unimplemented{Msg: msg}
-			case errorxpb.UNPROCESSABLE_ENTITY:
-				return UnprocessableEntity{Msg: msg}
-			case errorxpb.CONFLICT:
-				return Conflict{Msg: msg}
-			case errorxpb.TOO_MANY_REQUESTS:
+			case errorxpb.ErrorxType_RATE_LIMITED:
 				return TooManyRequests{Msg: msg}
-			case errorxpb.UNSUPPORTED_MEDIA_TYPE:
+			case errorxpb.ErrorxType_DISABLED:
+				return Disabled{}
+			case errorxpb.ErrorxType_UNIMPLEMENTED:
+				return Unimplemented{Msg: msg}
+			case errorxpb.ErrorxType_UNPROCESSABLE_ENTITY:
+				return UnprocessableEntity{Msg: msg}
+			case errorxpb.ErrorxType_CONFLICT:
+				return Conflict{Msg: msg}
+			case errorxpb.ErrorxType_TOO_MANY_REQUESTS:
+				return TooManyRequests{Msg: msg}
+			case errorxpb.ErrorxType_UNSUPPORTED_MEDIA_TYPE:
 				return UnsupportedMediaType{Msg: msg}
 			default:
 				return Internal{Msg: "invalid errorx type specifier. " + msg}
@@ -131,7 +135,7 @@ func (e Internal) GRPCStatus() *grpcStatus.Status {
 
 func (e Internal) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.INTERNAL,
+		Type: errorxpb.ErrorxType_INTERNAL,
 	}}
 }
 
@@ -167,7 +171,7 @@ func (e BadRequest) GRPCStatus() *grpcStatus.Status {
 
 func (e BadRequest) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.BAD_REQUEST,
+		Type: errorxpb.ErrorxType_BAD_REQUEST,
 	}}
 }
 
@@ -206,44 +210,8 @@ func (e RequiresProxyRequest) GRPCStatus() *grpcStatus.Status {
 
 func (e RequiresProxyRequest) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type:   errorxpb.REQUIRES_PROXY_REQUEST,
+		Type:   errorxpb.ErrorxType_REQUIRES_PROXY_REQUEST,
 		Reason: e.Reason,
-	}}
-}
-
-var _ Error = RateLimited{}
-
-type RateLimited struct {
-	Msg string
-	Err error
-}
-
-func (e RateLimited) Error() string {
-	if e.Err != nil {
-		return fmt.Sprintf("%s: %s", e.Msg, e.Err)
-	}
-	return e.Msg
-}
-
-func (e RateLimited) Message() string {
-	return e.Msg
-}
-
-func (e RateLimited) Unwrap() error {
-	return e.Err
-}
-
-func (e RateLimited) HTTPStatusCode() int {
-	return http.StatusTooManyRequests
-}
-
-func (e RateLimited) GRPCStatus() *grpcStatus.Status {
-	return WithErrorxTypeDetail(grpcStatus.New(codes.ResourceExhausted, e.Error()), e.GRPCStatusDetails()...)
-}
-
-func (e RateLimited) GRPCStatusDetails() []protov1.Message {
-	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.RATE_LIMITED,
 	}}
 }
 
@@ -269,7 +237,7 @@ func (e Disabled) GRPCStatus() *grpcStatus.Status {
 
 func (e Disabled) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.DISABLED,
+		Type: errorxpb.ErrorxType_DISABLED,
 	}}
 }
 
@@ -297,7 +265,7 @@ func (e Unimplemented) GRPCStatus() *grpcStatus.Status {
 
 func (e Unimplemented) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.UNIMPLEMENTED,
+		Type: errorxpb.ErrorxType_UNIMPLEMENTED,
 	}}
 }
 
@@ -325,7 +293,7 @@ func (e UnprocessableEntity) GRPCStatus() *grpcStatus.Status {
 
 func (e UnprocessableEntity) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.UNPROCESSABLE_ENTITY,
+		Type: errorxpb.ErrorxType_UNPROCESSABLE_ENTITY,
 	}}
 }
 
@@ -361,7 +329,7 @@ func (e Conflict) GRPCStatus() *grpcStatus.Status {
 
 func (e Conflict) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.CONFLICT,
+		Type: errorxpb.ErrorxType_CONFLICT,
 	}}
 }
 
@@ -397,7 +365,7 @@ func (e UnsupportedMediaType) GRPCStatus() *grpcStatus.Status {
 
 func (e UnsupportedMediaType) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.UNSUPPORTED_MEDIA_TYPE,
+		Type: errorxpb.ErrorxType_UNSUPPORTED_MEDIA_TYPE,
 	}}
 }
 
@@ -433,6 +401,13 @@ func (e TooManyRequests) GRPCStatus() *grpcStatus.Status {
 
 func (e TooManyRequests) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
-		Type: errorxpb.TOO_MANY_REQUESTS,
+		Type: errorxpb.ErrorxType_TOO_MANY_REQUESTS,
 	}}
+}
+
+func TryUnwrap(err error) error {
+	if wrapped, ok := err.(interface{ Unwrap() error }); ok {
+		return wrapped.Unwrap()
+	}
+	return err
 }

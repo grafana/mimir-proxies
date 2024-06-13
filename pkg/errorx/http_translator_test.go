@@ -50,10 +50,6 @@ func TestLogAndSetHttpError(t *testing.T) {
 			err:          BadRequest{Err: Internal{}},
 			expectedCode: http.StatusBadRequest,
 		},
-		"ratelimited": {
-			err:          RateLimited{},
-			expectedCode: http.StatusTooManyRequests,
-		},
 		"internal": {
 			err:          Internal{},
 			expectedCode: http.StatusInternalServerError,

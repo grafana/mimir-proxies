@@ -8,7 +8,10 @@ import (
 	"github.com/grafana/mimir-proxies/pkg/remoteread/remotereadmock"
 
 	"github.com/prometheus/prometheus/model/labels"
+	"github.com/prometheus/prometheus/util/annotations"
+
 	"github.com/prometheus/prometheus/storage"
+
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
@@ -39,10 +42,10 @@ func (s *MeasuredStorageQueryableTestSuite) SetupTest() {
 	s.recorderMock = &MockRecorder{}
 	s.queryableMock = &remotereadmock.StorageQueryableInterface{}
 	s.querierMock = &remotereadmock.StorageQuerierInterface{}
-	s.queryableMock.On("Querier", mock.Anything, s.mint, s.maxt).Return(s.querierMock, nil)
+	s.queryableMock.On("Querier", s.mint, s.maxt).Return(s.querierMock, nil)
 
 	var err error
-	s.underTest, err = NewMeasuredStorageQueryable(s.queryableMock, s.recorderMock, s.timeNow).Querier(context.Background(), s.mint, s.maxt)
+	s.underTest, err = NewMeasuredStorageQueryable(s.queryableMock, s.recorderMock, s.timeNow).Querier(s.mint, s.maxt)
 	s.Require().NoError(err)
 }
 
@@ -54,12 +57,12 @@ func (s *MeasuredStorageQueryableTestSuite) TearDownTest() {
 func (s *MeasuredStorageQueryableTestSuite) TestSelect_Success() {
 	matchers := []*labels.Matcher{labels.MustNewMatcher(labels.MatchEqual, "foo", "bar")}
 	emptySet := storage.EmptySeriesSet()
-	s.querierMock.On("Select", true, (*storage.SelectHints)(nil), matchers[0]).
+	s.querierMock.On("Select", mock.Anything, true, (*storage.SelectHints)(nil), matchers[0]).
 		Run(s.addSomeLatency()).
 		Return(emptySet).Once()
 	s.recorderMock.On("measure", "StorageQuerier.Select", s.someLatency, nil).Once()
 
-	set := s.underTest.Select(true, nil, matchers...)
+	set := s.underTest.Select(context.Background(), true, nil, matchers...)
 
 	s.NoError(set.Err())
 }
@@ -68,12 +71,12 @@ func (s *MeasuredStorageQueryableTestSuite) TestSelect_Error() {
 	matchers := []*labels.Matcher{labels.MustNewMatcher(labels.MatchEqual, "foo", "bar")}
 	expectedErr := context.Canceled
 	errSet := storage.ErrSeriesSet(expectedErr)
-	s.querierMock.On("Select", true, (*storage.SelectHints)(nil), matchers[0]).
+	s.querierMock.On("Select", mock.Anything, true, (*storage.SelectHints)(nil), matchers[0]).
 		Run(s.addSomeLatency()).
 		Return(errSet).Once()
 	s.recorderMock.On("measure", "StorageQuerier.Select", s.someLatency, expectedErr).Once()
 
-	set := s.underTest.Select(true, nil, matchers...)
+	set := s.underTest.Select(context.Background(), true, nil, matchers...)
 
 	s.ErrorIs(set.Err(), expectedErr)
 }
@@ -81,13 +84,13 @@ func (s *MeasuredStorageQueryableTestSuite) TestSelect_Error() {
 func (s *MeasuredStorageQueryableTestSuite) TestLabelNames_Success() {
 	matchers := []*labels.Matcher{labels.MustNewMatcher(labels.MatchEqual, "foo", "bar")}
 	mockValue := []string{"foobar"}
-	mockWarnings := storage.Warnings{}
-	s.querierMock.On("LabelNames", matchers[0]).
+	mockWarnings := annotations.Annotations{}
+	s.querierMock.On("LabelNames", mock.Anything, matchers[0]).
 		Run(s.addSomeLatency()).
 		Return(mockValue, mockWarnings, nil).Once()
 	s.recorderMock.On("measure", "StorageQuerier.LabelNames", s.someLatency, nil).Once()
 
-	actualValue, actualWarnings, err := s.underTest.LabelNames(matchers...)
+	actualValue, actualWarnings, err := s.underTest.LabelNames(context.Background(), matchers...)
 
 	s.NoError(err)
 	s.Equal(mockValue, actualValue)
@@ -98,13 +101,13 @@ func (s *MeasuredStorageQueryableTestSuite) TestLabelValues_Success() {
 	const labelName = "foobar"
 	matchers := []*labels.Matcher{labels.MustNewMatcher(labels.MatchEqual, "foo", "bar")}
 	mockValue := []string{"foo", "bar"}
-	mockWarnings := storage.Warnings{}
-	s.querierMock.On("LabelValues", labelName, matchers[0]).
+	mockWarnings := annotations.Annotations{}
+	s.querierMock.On("LabelValues", mock.Anything, labelName, matchers[0]).
 		Run(s.addSomeLatency()).
 		Return(mockValue, mockWarnings, nil).Once()
 	s.recorderMock.On("measure", "StorageQuerier.LabelValues", s.someLatency, nil).Once()
 
-	actualValue, actualWarnings, err := s.underTest.LabelValues(labelName, matchers...)
+	actualValue, actualWarnings, err := s.underTest.LabelValues(context.Background(), labelName, matchers...)
 
 	s.NoError(err)
 	s.Equal(mockValue, actualValue)

@@ -216,7 +216,7 @@ func fromQueryResult(res *prompb.QueryResult) storage.SeriesSet {
 		series = append(series, cortexseries.NewConcreteSeries(lbls, sampleProtosToSamples(ts.Samples), nil))
 	}
 
-	return cortexseries.NewConcreteSeriesSet(series)
+	return cortexseries.NewConcreteSeriesSetFromUnsortedSeries(series)
 }
 
 func sampleProtosToSamples(in []prompb.Sample) []model.SamplePair {

@@ -54,10 +54,6 @@ var errMap = map[string]struct {
 		err:            errorx.BadRequest{Err: errorx.Internal{}},
 		expectedStatus: http.StatusBadRequest,
 	},
-	"ratelimited": {
-		err:            errorx.RateLimited{},
-		expectedStatus: http.StatusTooManyRequests,
-	},
 	"internal": {
 		err:            errorx.Internal{},
 		expectedStatus: http.StatusInternalServerError,

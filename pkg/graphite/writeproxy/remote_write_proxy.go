@@ -108,7 +108,7 @@ func (wp *RemoteWriteProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = wp.client.Write(ctx, &req)
 	if err != nil {
-		if errors.As(err, &errorx.RateLimited{}) {
+		if errors.As(err, &errorx.TooManyRequests{}) {
 			level.Warn(log).Log("msg", "too many requests", "err", err)
 			http.Error(w, fmt.Sprintf("too many requests: %s", err), http.StatusTooManyRequests)
 			return

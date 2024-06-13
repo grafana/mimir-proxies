@@ -177,7 +177,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 						},
 					},
 					SkipLabelNameValidation: true,
-				}).Return(errorx.RateLimited{Msg: "simulating rate limited"})
+				}).Return(errorx.TooManyRequests{Msg: "simulating rate limited"})
 				return remoteWriteMock
 			},
 			status: http.StatusTooManyRequests,

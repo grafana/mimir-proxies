@@ -29,7 +29,7 @@ PROTO_PATH="protos:${GOGOPROTO_PATH}:vendor"
 echo "INFO: Generating code"
 for dir in "${DIRS[@]}"; do
 	protoc \
-	--gogoslick_out=Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,plugins=grpc:./ \
+	--go_out=.  \
 	-I="${PROTO_PATH}" \
 	"${dir}"/*.proto
 done
