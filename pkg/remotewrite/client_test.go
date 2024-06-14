@@ -14,7 +14,7 @@ import (
 
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 
-	"github.com/weaveworks/common/user"
+	"github.com/grafana/dskit/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

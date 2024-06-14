@@ -19,12 +19,12 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/snappy"
+	"github.com/grafana/dskit/user"
 	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/mwitkow/go-conntrack"
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/weaveworks/common/user"
 
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 )

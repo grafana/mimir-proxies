@@ -3,7 +3,7 @@ package writeproxy
 import (
 	"time"
 
-	"github.com/weaveworks/common/instrument"
+	"github.com/grafana/dskit/instrument"
 
 	"github.com/prometheus/client_golang/prometheus"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/weaveworks/common/user"
+	"github.com/grafana/dskit/user"
 )
 
 func TestExtractOrgID(t *testing.T) {

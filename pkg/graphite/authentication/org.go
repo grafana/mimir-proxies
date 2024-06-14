@@ -3,7 +3,7 @@ package authentication
 import (
 	"context"
 
-	"github.com/weaveworks/common/user"
+	"github.com/grafana/dskit/user"
 )
 
 // ExtractOrgID extracts the org id from the given context and returns
