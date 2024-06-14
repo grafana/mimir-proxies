@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
-	"github.com/weaveworks/common/user"
+	"github.com/grafana/dskit/user"
 )
 
 type Log struct {

@@ -11,6 +11,9 @@ import (
 
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/storage"
+	"github.com/prometheus/prometheus/util/annotations"
+
+	remotereadstorage "github.com/grafana/mimir-proxies/pkg/remoteread/storage"
 )
 
 // MockQueryable can be used as a querier or queryable in test cases, it is
@@ -34,6 +37,12 @@ type MockQueryable struct {
 	// order is not enforced to allow for multi-threaded use.
 	ExpectedLabelValuesCalls []LabelValuesCall
 
+	// List of expected calls to the Querier's .Series() method,
+	// order is not enforced to allow for multi-threaded use.
+	ExpectedSeriesCalls []SeriesCall
+
+	ExpectedLabelNamesCalls []LabelNamesCall
+
 	UnlimitedCalls bool
 }
 
@@ -41,13 +50,14 @@ func (m *MockQueryable) Close() error {
 	return nil
 }
 
-func (m *MockQueryable) LabelNames(_ ...*labels.Matcher) ([]string, storage.Warnings, error) {
-	return nil, nil, nil
-}
+type AnyType struct{}
+
+var Any = &AnyType{}
 
 type Call struct {
-	ExpectedMinT int64
-	ExpectedMaxT int64
+	ExpectedMinT interface{}
+	ExpectedMaxT interface{}
+	ReturnErr    error
 }
 
 type SelectCall struct {
@@ -61,16 +71,54 @@ type LabelValuesCall struct {
 	Label        string
 	Matchers     []*labels.Matcher
 	ReturnValues []string
+	ReturnErr    error
 }
 
-func (m *MockQueryable) Querier(_ context.Context, mint, maxt int64) (storage.Querier, error) {
+type SeriesCall struct {
+	Matchers     []string
+	ReturnValues []map[string]string
+}
+
+type LabelNamesCall struct {
+	ReturnValues   []string
+	ReturnWarnings annotations.Annotations
+	ReturnErr      error
+}
+
+func (m *MockQueryable) Querier(mint, maxt int64) (remotereadstorage.Querier, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	for callIdx := range m.ExpectedQuerierCalls {
-		if m.ExpectedQuerierCalls[callIdx].ExpectedMinT != mint || m.ExpectedQuerierCalls[callIdx].ExpectedMaxT != maxt {
+		var expectedMinT int64
+		if m.ExpectedQuerierCalls[callIdx].ExpectedMinT == Any {
+			expectedMinT = mint
+		} else {
+			switch v := m.ExpectedQuerierCalls[callIdx].ExpectedMinT.(type) {
+			case int:
+				expectedMinT = int64(v)
+			case int64:
+				expectedMinT = v
+			}
+		}
+
+		var expectedMaxT int64
+		if m.ExpectedQuerierCalls[callIdx].ExpectedMaxT == Any {
+			expectedMaxT = maxt
+		} else {
+			switch v := m.ExpectedQuerierCalls[callIdx].ExpectedMaxT.(type) {
+			case int:
+				expectedMaxT = int64(v)
+			case int64:
+				expectedMaxT = v
+			}
+		}
+
+		if expectedMinT != mint || expectedMaxT != maxt {
 			continue
 		}
+
+		returnErr := m.ExpectedQuerierCalls[callIdx].ReturnErr
 
 		if !m.UnlimitedCalls {
 			m.ExpectedQuerierCalls = append(m.ExpectedQuerierCalls[:callIdx], m.ExpectedQuerierCalls[callIdx+1:]...)
@@ -78,14 +126,15 @@ func (m *MockQueryable) Querier(_ context.Context, mint, maxt int64) (storage.Qu
 
 		// mockQueryable satisfies both interfaces
 		// storage.Queryable and storage.Querier.
-		return m, nil
+		return m, returnErr
 	}
 
-	m.TB.Fatalf("MockQueryable: Unexpected call to .Querier(ctx, %d, %d)", mint, maxt)
+	m.TB.Fatalf("MockQueryable: Unexpected call to .Querier(ctx, %d, %d), not found in remaining expected calls %+v", mint, maxt, m.ExpectedQuerierCalls)
 	return nil, errors.New("no querier")
 }
 
-func (m *MockQueryable) Select(sortSeries bool,
+func (m *MockQueryable) Select(_ context.Context,
+	sortSeries bool,
 	hints *storage.SelectHints,
 	matchers ...*labels.Matcher) storage.SeriesSet {
 	m.mu.Lock()
@@ -135,7 +184,7 @@ CALLS:
 	return nil
 }
 
-func (m *MockQueryable) LabelValues(labelName string, matchers ...*labels.Matcher) ([]string, storage.Warnings, error) {
+func (m *MockQueryable) LabelValues(_ context.Context, labelName string, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -149,16 +198,36 @@ func (m *MockQueryable) LabelValues(labelName string, matchers ...*labels.Matche
 		}
 
 		res := expectedCall.ReturnValues
-
+		returnError := expectedCall.ReturnErr
 		if !m.UnlimitedCalls {
 			m.ExpectedLabelValuesCalls = append(m.ExpectedLabelValuesCalls[:callIdx],
 				m.ExpectedLabelValuesCalls[callIdx+1:]...)
 		}
 
-		return res, nil, nil
+		return res, nil, returnError
 	}
 
-	m.TB.Fatalf("MockQuerier: Unexpected call to .Labelvalues(%s)", labelName)
+	m.TB.Fatalf("MockQuerier: Unexpected call to .LabelValues(%s)", labelName)
+	return nil, nil, nil
+}
+
+func (m *MockQueryable) LabelNames(context.Context, ...*labels.Matcher) ([]string, annotations.Annotations, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if len(m.ExpectedLabelNamesCalls) > 0 {
+		returnValues := m.ExpectedLabelNamesCalls[0].ReturnValues
+		returnWarnings := m.ExpectedLabelNamesCalls[0].ReturnWarnings
+		returnErr := m.ExpectedLabelNamesCalls[0].ReturnErr
+
+		if !m.UnlimitedCalls {
+			m.ExpectedLabelNamesCalls = m.ExpectedLabelNamesCalls[:0]
+		}
+
+		return returnValues, returnWarnings, returnErr
+	}
+
+	m.TB.Fatalf("MockQueryable: Unexpected call to .LabelNames()")
 	return nil, nil, nil
 }
 
@@ -167,21 +236,40 @@ func (m *MockQueryable) LabelValues(labelName string, matchers ...*labels.Matche
 func (m *MockQueryable) ValidateAllCalls() {
 	m.TB.Helper()
 
-	// Checking whether the mock querier was expecting more calls
-	// to its .Querier() method.
 	if len(m.ExpectedQuerierCalls) > 0 {
 		m.TB.Fatalf("Expected querier calls have not been made: %+v", m.ExpectedQuerierCalls)
 	}
 
-	// Checking whether the mock querier was expecting more calls
-	// to its .Select() method.
 	if len(m.ExpectedSelectCalls) > 0 {
 		m.TB.Fatalf("Expected select calls: %+v", m.ExpectedSelectCalls)
 	}
 
-	// Checking whether the mock querier was expecting more calls
-	// to its .LabelValues() method.
 	if len(m.ExpectedLabelValuesCalls) > 0 {
 		m.TB.Fatalf("Expected label values calls: %+v", m.ExpectedLabelValuesCalls)
 	}
+
+	if len(m.ExpectedLabelNamesCalls) > 0 {
+		m.TB.Fatalf("Expected label values calls: %+v", m.ExpectedLabelNamesCalls)
+	}
+}
+
+func (m *MockQueryable) Series(_ context.Context, labelMatchers []string) ([]map[string]string, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, expected := range m.ExpectedSeriesCalls {
+		if !reflect.DeepEqual(expected.Matchers, labelMatchers) {
+			continue
+		}
+
+		res := expected.ReturnValues
+
+		if !m.UnlimitedCalls {
+			m.ExpectedSeriesCalls = append(m.ExpectedSeriesCalls[:i], m.ExpectedSeriesCalls[i+1:]...)
+		}
+
+		return res, nil
+	}
+
+	return nil, nil
 }

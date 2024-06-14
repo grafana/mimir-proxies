@@ -168,7 +168,7 @@ func verifyBlock(t *testing.T, blockDir string, series map[string][]model.Sample
 	})
 
 	allK, allV := index.AllPostingsKey()
-	p, err := idx.Postings(allK, allV)
+	p, err := idx.Postings(context.Background(), allK, allV)
 
 	var stats tsdb.BlockStats
 	minT, maxT := int64(math.MaxInt64), int64(0)
@@ -197,7 +197,7 @@ func verifyBlock(t *testing.T, blockDir string, series map[string][]model.Sample
 		assert.Truef(t, ok, "unexpected series in the index", lbls.String())
 
 		for ix := 0; ix < len(chks); ix++ {
-			chks[ix].Chunk, err = chksReader.Chunk(chks[ix])
+			chks[ix].Chunk, _, err = chksReader.ChunkOrIterable(chks[ix])
 			require.NoError(t, err)
 		}
 
@@ -325,7 +325,7 @@ func (s *samplesIterator) Next() chunkenc.ValueType {
 	return chunkenc.ValNone
 }
 
-func (s samplesIterator) Seek(t int64) chunkenc.ValueType {
+func (s samplesIterator) Seek(int64) chunkenc.ValueType {
 	panic("not implemented")
 }
 
@@ -337,11 +337,11 @@ func (s samplesIterator) Err() error {
 	return nil
 }
 
-func (s samplesIterator) AtFloatHistogram() (int64, *histogram.FloatHistogram) {
+func (s samplesIterator) AtFloatHistogram(*histogram.FloatHistogram) (int64, *histogram.FloatHistogram) {
 	return 0, nil
 }
 
-func (s samplesIterator) AtHistogram() (int64, *histogram.Histogram) {
+func (s samplesIterator) AtHistogram(*histogram.Histogram) (int64, *histogram.Histogram) {
 	return 0, nil
 }
 

@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafana/mimir-proxies/pkg/appcommon"
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 	remotereadstorage "github.com/grafana/mimir-proxies/pkg/remoteread/storage"
-
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
+
+	"github.com/grafana/mimir-proxies/pkg/appcommon"
 	"github.com/mwitkow/go-conntrack"
 	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/api"
@@ -26,6 +26,7 @@ import (
 	"github.com/prometheus/prometheus/promql/parser"
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/storage/remote"
+	"github.com/prometheus/prometheus/util/annotations"
 )
 
 const (
@@ -110,14 +111,13 @@ type storageQueryable struct {
 	endpoint   string
 }
 
-func (q *storageQueryable) Querier(ctx context.Context, mint, maxt int64) (remotereadstorage.Querier, error) {
-	return &storageQuerier{ctx, mint, maxt, q.client, q.api, q.httpClient, q.endpoint}, nil
+func (q *storageQueryable) Querier(mint, maxt int64) (remotereadstorage.Querier, error) {
+	return &storageQuerier{mint, maxt, q.client, q.api, q.httpClient, q.endpoint}, nil
 }
 
 var _ storage.Querier = &storageQuerier{}
 
 type storageQuerier struct {
-	ctx        context.Context
 	mint, maxt int64
 
 	client     Client
@@ -126,11 +126,10 @@ type storageQuerier struct {
 	endpoint   string
 }
 
-func (q *storageQuerier) Select(sortSeries bool, hints *storage.SelectHints, matchers ...*labels.Matcher) (set storage.SeriesSet) {
-	ctx := q.ctx
-	if parentSpan := opentracing.SpanFromContext(q.ctx); parentSpan != nil {
+func (q *storageQuerier) Select(ctx context.Context, sortSeries bool, hints *storage.SelectHints, matchers ...*labels.Matcher) (set storage.SeriesSet) {
+	if parentSpan := opentracing.SpanFromContext(ctx); parentSpan != nil {
 		var span opentracing.Span
-		span, ctx = opentracing.StartSpanFromContextWithTracer(q.ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.Select")
+		span, ctx = opentracing.StartSpanFromContextWithTracer(ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.Select")
 		defer span.Finish()
 		span.LogKV("mint", q.mint, "maxt", q.maxt, "matchers", MatchersString(matchers), "sortSeries", sortSeries)
 		defer func() {
@@ -148,7 +147,7 @@ func (q *storageQuerier) Select(sortSeries bool, hints *storage.SelectHints, mat
 	res, err := q.client.Read(ctx, query)
 	if err != nil {
 		if strings.Contains(err.Error(), tooManyRequestsErrorSubstr) {
-			err = errorx.RateLimited{Err: err}
+			err = errorx.TooManyRequests{Err: err}
 		}
 
 		return storage.ErrSeriesSet(fmt.Errorf("can't perform remote read: %w", err))
@@ -157,11 +156,10 @@ func (q *storageQuerier) Select(sortSeries bool, hints *storage.SelectHints, mat
 	return res
 }
 
-func (q *storageQuerier) LabelValues(label string, matchers ...*labels.Matcher) ([]string, storage.Warnings, error) {
-	ctx := q.ctx
-	if parentSpan := opentracing.SpanFromContext(q.ctx); parentSpan != nil {
+func (q *storageQuerier) LabelValues(ctx context.Context, label string, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
+	if parentSpan := opentracing.SpanFromContext(ctx); parentSpan != nil {
 		var span opentracing.Span
-		span, ctx = opentracing.StartSpanFromContextWithTracer(q.ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.LabelValues")
+		span, ctx = opentracing.StartSpanFromContextWithTracer(ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.LabelValues")
 		defer span.Finish()
 		span.LogKV("mint", q.mint, "maxt", q.maxt, "name", label, "matchers", MatchersString(matchers))
 	}
@@ -178,11 +176,10 @@ func (q *storageQuerier) LabelValues(label string, matchers ...*labels.Matcher) 
 	return labelValues.Data, nil, nil
 }
 
-func (q *storageQuerier) LabelNames(matchers ...*labels.Matcher) ([]string, storage.Warnings, error) {
-	ctx := q.ctx
-	if parentSpan := opentracing.SpanFromContext(q.ctx); parentSpan != nil {
+func (q *storageQuerier) LabelNames(ctx context.Context, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
+	if parentSpan := opentracing.SpanFromContext(ctx); parentSpan != nil {
 		var span opentracing.Span
-		span, ctx = opentracing.StartSpanFromContextWithTracer(q.ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.LabelNames")
+		span, ctx = opentracing.StartSpanFromContextWithTracer(ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.LabelNames")
 		defer span.Finish()
 		span.LogKV("mint", q.mint, "maxt", q.maxt, "matchers", MatchersString(matchers))
 	}
@@ -234,11 +231,10 @@ func (q *storageQuerier) Close() error {
 	return nil
 }
 
-func (q *storageQuerier) Series(matchers []string) ([]map[string]string, error) {
-	ctx := q.ctx
-	if parentSpan := opentracing.SpanFromContext(q.ctx); parentSpan != nil {
+func (q *storageQuerier) Series(ctx context.Context, matchers []string) ([]map[string]string, error) {
+	if parentSpan := opentracing.SpanFromContext(ctx); parentSpan != nil {
 		var span opentracing.Span
-		span, ctx = opentracing.StartSpanFromContextWithTracer(q.ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.Series")
+		span, ctx = opentracing.StartSpanFromContextWithTracer(ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.Series")
 		defer span.Finish()
 		span.LogKV("matchers", matchers)
 	}
@@ -248,10 +244,10 @@ func (q *storageQuerier) Series(matchers []string) ([]map[string]string, error) 
 		data.Add("match[]", m)
 	}
 	if q.mint >= 0 {
-		data.Set("start", strconv.FormatInt(time.UnixMilli(q.mint).Unix(), 10)) //nolint:gomnd
+		data.Set("start", strconv.FormatInt(time.UnixMilli(q.mint).Unix(), 10))
 	}
 	if q.maxt >= 0 {
-		data.Set("end", strconv.FormatInt(time.UnixMilli(q.maxt).Unix(), 10)) //nolint:gomnd
+		data.Set("end", strconv.FormatInt(time.UnixMilli(q.maxt).Unix(), 10))
 	}
 
 	u, err := url.Parse(q.endpoint)

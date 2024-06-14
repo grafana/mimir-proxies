@@ -12,8 +12,8 @@ import (
 
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gogo/protobuf/proto"
+	"github.com/grafana/dskit/user"
 	"github.com/prometheus/prometheus/prompb"
-	"github.com/weaveworks/common/user"
 
 	"github.com/grafana/mimir-proxies/pkg/ctxlog"
 	"github.com/grafana/mimir-proxies/pkg/memcached"
@@ -49,6 +49,7 @@ func (c *CacheConfig) RegisterFlags(flags *flag.FlagSet) {
 // RegisterFlagsWithPrefix registers flags, adding the provided prefix if
 // needed. If the prefix is not blank and doesn't end with '.', a '.' is
 // appended to it.
+//
 //nolint:gomnd
 func (c *CacheConfig) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	if prefix != "" && !strings.HasSuffix(prefix, ".") {

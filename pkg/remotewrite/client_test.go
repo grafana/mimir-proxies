@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/grafana/mimir/pkg/distributor"
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
 	"github.com/grafana/mimir/pkg/mimirpb"
-	"github.com/grafana/mimir/pkg/util/push"
 
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 
-	"github.com/weaveworks/common/user"
+	"github.com/grafana/dskit/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -97,7 +97,7 @@ func TestHTTPRemoteWriteClient_Write(t *testing.T) {
 
 		mux := http.NewServeMux()
 		mux.Handle("/api/prom/push", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			assert.Equal(req.Header.Get(push.SkipLabelNameValidationHeader), "true")
+			assert.Equal(req.Header.Get(distributor.SkipLabelNameValidationHeader), "true")
 			rw.WriteHeader(http.StatusOK)
 			_, _ = rw.Write([]byte{})
 		}))

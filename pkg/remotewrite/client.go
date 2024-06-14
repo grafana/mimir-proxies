@@ -12,19 +12,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/grafana/mimir/pkg/distributor"
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
-	"github.com/grafana/mimir/pkg/util/push"
 
 	"github.com/grafana/mimir-proxies/pkg/appcommon"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/snappy"
+	"github.com/grafana/dskit/user"
 	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/mwitkow/go-conntrack"
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/weaveworks/common/user"
 
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 )
@@ -37,6 +37,7 @@ const (
 const defaultWriteTimeout = 1 * time.Second
 
 // Client provides Prometheus Remote Write API access functionality
+//
 //go:generate mockery --output remotewritemock --outpkg remotewritemock --case underscore --name Client
 type Client interface {
 	Write(ctx context.Context, req *mimirpb.WriteRequest) error
@@ -60,6 +61,7 @@ func (c *Config) RegisterFlags(flags *flag.FlagSet) {
 // RegisterFlagsWithPrefix registers flags, adding the provided prefix if
 // needed. If the prefix is not blank and doesn't end with '.', a '.' is
 // appended to it.
+//
 //nolint:gomnd
 func (c *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	if prefix != "" && !strings.HasSuffix(prefix, ".") {
@@ -141,7 +143,7 @@ func (c *client) Write(ctx context.Context, req *mimirpb.WriteRequest) error {
 	httpReq.Header.Set("User-Agent", c.cfg.UserAgent)
 	httpReq.Header.Set("X-Prometheus-Remote-Write-Version", "0.1.0")
 	if c.cfg.SkipLabelValidation {
-		httpReq.Header.Set(push.SkipLabelNameValidationHeader, "true")
+		httpReq.Header.Set(distributor.SkipLabelNameValidationHeader, "true")
 	}
 	ctx, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
 	defer cancel()
@@ -199,7 +201,7 @@ func (c *client) errFromResp(resp *http.Response) error {
 	}
 
 	if resp.StatusCode == http.StatusTooManyRequests {
-		return errorx.RateLimited{Msg: "too many write requests", Err: err}
+		return errorx.TooManyRequests{Msg: "too many write requests", Err: err}
 	}
 
 	return errorx.Internal{Msg: "failed writing metrics", Err: err}

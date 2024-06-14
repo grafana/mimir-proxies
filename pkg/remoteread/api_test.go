@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/grafana/dskit/user"
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/stretchr/testify/require"
-	"github.com/weaveworks/common/user"
 
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 )

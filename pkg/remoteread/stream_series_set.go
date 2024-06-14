@@ -2,7 +2,6 @@ package remoteread
 
 import (
 	"io"
-	"sort"
 
 	"github.com/prometheus/prometheus/model/histogram"
 	"github.com/prometheus/prometheus/model/labels"
@@ -10,6 +9,9 @@ import (
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/storage/remote"
 	"github.com/prometheus/prometheus/tsdb/chunkenc"
+	"github.com/prometheus/prometheus/util/annotations"
+
+	labelsutil "github.com/grafana/mimir-proxies/pkg/util/labels"
 )
 
 // streamingSeriesSet implements storage.SeriesSet
@@ -71,7 +73,7 @@ func (s *streamingSeriesSet) Err() error {
 	return s.err
 }
 
-func (s *streamingSeriesSet) Warnings() storage.Warnings {
+func (s *streamingSeriesSet) Warnings() annotations.Annotations {
 	return nil
 }
 
@@ -84,17 +86,7 @@ type streamingSeries struct {
 }
 
 func (s *streamingSeries) Labels() labels.Labels {
-	result := make(labels.Labels, 0, len(s.labels))
-
-	for _, l := range s.labels {
-		result = append(result, labels.Label{
-			Name:  l.Name,
-			Value: l.Value,
-		})
-	}
-	sort.Sort(result)
-
-	return result
+	return labelsutil.LabelProtosToLabels(s.labels)
 }
 
 func (s *streamingSeries) Iterator(_ chunkenc.Iterator) chunkenc.Iterator {
@@ -221,12 +213,12 @@ func (it *streamingSeriesIterator) Err() error {
 	return it.err
 }
 
-func (it *streamingSeriesIterator) AtFloatHistogram() (int64, *histogram.FloatHistogram) {
-	return it.cur.AtFloatHistogram()
+func (it *streamingSeriesIterator) AtFloatHistogram(fh *histogram.FloatHistogram) (int64, *histogram.FloatHistogram) {
+	return it.cur.AtFloatHistogram(fh)
 }
 
-func (it *streamingSeriesIterator) AtHistogram() (int64, *histogram.Histogram) {
-	return it.cur.AtHistogram()
+func (it *streamingSeriesIterator) AtHistogram(h *histogram.Histogram) (int64, *histogram.Histogram) {
+	return it.cur.AtHistogram(h)
 }
 
 func (it *streamingSeriesIterator) AtT() int64 {

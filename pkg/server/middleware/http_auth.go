@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-kit/log"
 
-	"github.com/weaveworks/common/user"
+	"github.com/grafana/dskit/user"
 )
 
 type HTTPAuth struct {

@@ -150,11 +150,7 @@ func (b *Builder) AddSeriesWithSamples(lbls labels.Labels, samples chunkenc.Iter
 		return err
 	}
 
-	if err := b.addSeries(lbls, chks); err != nil {
-		return err
-	}
-
-	return nil
+	return b.addSeries(lbls, chks)
 }
 
 // FinishBlock will build the final TSDB block from series added previously via AddSeriesWithSamples. FinishBlock should
@@ -293,7 +289,7 @@ func addSeriesToIndex(indexWriter *index.Writer, chunksWriter *chunks.Writer, se
 
 		// We need to load chunks for this series from unsortedChunksReader, and write them via chunksWriter
 		for ix := range ser.Chunks {
-			ser.Chunks[ix].Chunk, err = unsortedChunksReader.Chunk(ser.Chunks[ix])
+			ser.Chunks[ix].Chunk, _, err = unsortedChunksReader.ChunkOrIterable(ser.Chunks[ix])
 			if err != nil {
 				return stats, minT, maxT, fmt.Errorf("failed to load chunk %d: %v", ser.Chunks[ix].Ref, err)
 			}
@@ -362,7 +358,7 @@ func addSymbolsToIndexWriter(indexWriter *index.Writer, symbolFiles []string) er
 
 	closeErr := si.Close()
 	if err == nil {
-		err = closeErr
+		return closeErr
 	}
 	return err
 }
@@ -388,10 +384,7 @@ func (b *Builder) addSeries(lbls labels.Labels, chunks []chunks.Meta) error {
 	b.seriesMtx.Lock()
 	defer b.seriesMtx.Unlock()
 
-	if err := b.series.addSeries(lbls, chunks); err != nil {
-		return err
-	}
-	return nil
+	return b.series.addSeries(lbls, chunks)
 }
 
 // writeChunksForUnsortedSeries writes chunks to the disk, but also updates "Ref" field in chunks.Meta with

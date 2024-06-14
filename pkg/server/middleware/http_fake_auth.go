@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/weaveworks/common/user"
+	"github.com/grafana/dskit/user"
 )
 
 type HTTPFakeAuth struct{}

@@ -3,8 +3,8 @@ package appcommon
 import (
 	"net/http"
 
+	"github.com/grafana/dskit/user"
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
-	"github.com/weaveworks/common/user"
 
 	opentracing "github.com/opentracing/opentracing-go"
 )

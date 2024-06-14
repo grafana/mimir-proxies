@@ -21,13 +21,13 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 
 	"github.com/go-kit/log"
+	"github.com/grafana/dskit/user"
 	"github.com/grafana/mimir-proxies/pkg/ctxlog"
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 	"github.com/grafana/mimir-proxies/pkg/server"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/weaveworks/common/user"
 )
 
 var errMap = map[string]struct {
@@ -53,10 +53,6 @@ var errMap = map[string]struct {
 	"badrequest.wrapping.internal": {
 		err:            errorx.BadRequest{Err: errorx.Internal{}},
 		expectedStatus: http.StatusBadRequest,
-	},
-	"ratelimited": {
-		err:            errorx.RateLimited{},
-		expectedStatus: http.StatusTooManyRequests,
 	},
 	"internal": {
 		err:            errorx.Internal{},

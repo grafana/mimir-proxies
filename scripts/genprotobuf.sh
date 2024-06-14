@@ -14,23 +14,15 @@ fi
 
 # It's necessary to run go mod vendor because protoc needs the source files to resolve the imports
 echo "INFO: Running go mod vendor"
-go mod vendor
 
 DIRS=( "protos/errorx/v1")
 
-command -v protoc-gen-gogofast >/dev/null 2>&1 || { echo "protoc-gen-gogofast is not installed"; exit 1; }
-command -v protoc-gen-gogoslick >/dev/null 2>&1 || { echo "protoc-gen-gogoslick is not installed"; exit 1; }
-
-# Set the import path for Proto files
-GOGOPROTO_ROOT="$(go list -mod=mod -f '{{ .Dir }}' -m github.com/gogo/protobuf)"
-GOGOPROTO_PATH="${GOGOPROTO_ROOT}:${GOGOPROTO_ROOT}/protobuf"
-PROTO_PATH="protos:${GOGOPROTO_PATH}:vendor"
+command -v protoc-gen-go >/dev/null 2>&1 || { echo "protoc-gen-go is not installed"; exit 1; }
 
 echo "INFO: Generating code"
 for dir in "${DIRS[@]}"; do
 	protoc \
-	--gogoslick_out=Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,plugins=grpc:./ \
-	-I="${PROTO_PATH}" \
+	--go_out=.  \
 	"${dir}"/*.proto
 done
 
