@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/grafana/mimir-proxies/compare/v1.1.2...v1.2.0) (2024-06-14)
+
+
+### Features
+
+* utilities for manipulating blocks ([#152](https://github.com/grafana/mimir-proxies/issues/152)) ([9e2e794](https://github.com/grafana/mimir-proxies/commit/9e2e7946c33b256ee474b804b42e58c0da61bf82))
+
 ## [1.1.2](https://github.com/grafana/mimir-proxies/compare/v1.1.1...v1.1.2) (2024-03-19)
 
 
