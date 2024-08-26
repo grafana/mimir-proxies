@@ -30,7 +30,7 @@ require (
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.opentelemetry.io/otel v1.29.0
 	go.opentelemetry.io/otel/bridge/opentracing v1.29.0
-	go.opentelemetry.io/otel/sdk v1.28.0
+	go.opentelemetry.io/otel/sdk v1.29.0
 	go.opentelemetry.io/otel/trace v1.29.0
 	golang.org/x/net v0.28.0
 	google.golang.org/grpc v1.65.0
@@ -161,7 +161,7 @@ require (
 	golang.org/x/mod v0.18.0 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
