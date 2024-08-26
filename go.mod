@@ -29,7 +29,7 @@ require (
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.opentelemetry.io/otel v1.29.0
-	go.opentelemetry.io/otel/bridge/opentracing v1.28.0
+	go.opentelemetry.io/otel/bridge/opentracing v1.29.0
 	go.opentelemetry.io/otel/sdk v1.28.0
 	go.opentelemetry.io/otel/trace v1.29.0
 	golang.org/x/net v0.28.0
