@@ -53,9 +53,9 @@ func (c *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 type API interface {
 	Query(ctx context.Context, query string, ts time.Time, opts ...v1.Option) (model.Value, v1.Warnings, error)
 	QueryRange(ctx context.Context, query string, r v1.Range, opts ...v1.Option) (model.Value, v1.Warnings, error)
-	Series(ctx context.Context, matches []string, startTime time.Time, endTime time.Time) ([]model.LabelSet, v1.Warnings, error)
-	LabelNames(ctx context.Context, matches []string, startTime time.Time, endTime time.Time) ([]string, v1.Warnings, error)
-	LabelValues(ctx context.Context, label string, matches []string, startTime time.Time, endTime time.Time) (model.LabelValues, v1.Warnings, error)
+	Series(ctx context.Context, matches []string, startTime time.Time, endTime time.Time, opts ...v1.Option) ([]model.LabelSet, v1.Warnings, error)
+	LabelNames(ctx context.Context, matches []string, startTime time.Time, endTime time.Time, opts ...v1.Option) ([]string, v1.Warnings, error)
+	LabelValues(ctx context.Context, label string, matches []string, startTime time.Time, endTime time.Time, opts ...v1.Option) (model.LabelValues, v1.Warnings, error)
 }
 
 type errorMappingAPI struct {
@@ -84,19 +84,19 @@ func (e errorMappingAPI) QueryRange(ctx context.Context, query string, r v1.Rang
 	return e.api.QueryRange(ctx, query, r, opts...)
 }
 
-func (e errorMappingAPI) Series(ctx context.Context, matches []string, startTime, endTime time.Time) (_ []model.LabelSet, _ v1.Warnings, err error) {
+func (e errorMappingAPI) Series(ctx context.Context, matches []string, startTime, endTime time.Time, opts ...v1.Option) (_ []model.LabelSet, _ v1.Warnings, err error) {
 	defer func() { err = mapAPIError(err) }()
-	return e.api.Series(ctx, matches, startTime, endTime)
+	return e.api.Series(ctx, matches, startTime, endTime, opts...)
 }
 
-func (e errorMappingAPI) LabelNames(ctx context.Context, matches []string, startTime, endTime time.Time) (_ []string, _ v1.Warnings, err error) {
+func (e errorMappingAPI) LabelNames(ctx context.Context, matches []string, startTime, endTime time.Time, opts ...v1.Option) (_ []string, _ v1.Warnings, err error) {
 	defer func() { err = mapAPIError(err) }()
-	return e.api.LabelNames(ctx, matches, startTime, endTime)
+	return e.api.LabelNames(ctx, matches, startTime, endTime, opts...)
 }
 
-func (e errorMappingAPI) LabelValues(ctx context.Context, label string, matches []string, startTime, endTime time.Time) (_ model.LabelValues, _ v1.Warnings, err error) {
+func (e errorMappingAPI) LabelValues(ctx context.Context, label string, matches []string, startTime, endTime time.Time, opts ...v1.Option) (_ model.LabelValues, _ v1.Warnings, err error) {
 	defer func() { err = mapAPIError(err) }()
-	return e.api.LabelValues(ctx, label, matches, startTime, endTime)
+	return e.api.LabelValues(ctx, label, matches, startTime, endTime, opts...)
 }
 
 func NewAPI(cfg Config, options ...APIOption) (API, error) {

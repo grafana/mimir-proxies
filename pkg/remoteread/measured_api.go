@@ -55,7 +55,7 @@ func (ma *MeasuredAPI) QueryRange(ctx context.Context, query string, r v1.Range,
 	return ma.api.QueryRange(ctx, query, r, opts...)
 }
 
-func (ma *MeasuredAPI) Series(ctx context.Context, matches []string, startTime, endTime time.Time) (ls []model.LabelSet, w v1.Warnings, err error) {
+func (ma *MeasuredAPI) Series(ctx context.Context, matches []string, startTime, endTime time.Time, opts ...v1.Option) (ls []model.LabelSet, w v1.Warnings, err error) {
 	sp, ctx := opentracing.StartSpanFromContextWithTracer(ctx, ma.tracer, "remoteread.Series")
 	defer sp.Finish()
 	sp.LogKV("matches", strings.Join(matches, ","), "startTime", startTime, "endTime", endTime)
@@ -63,10 +63,10 @@ func (ma *MeasuredAPI) Series(ctx context.Context, matches []string, startTime, 
 	defer func(t0 time.Time) {
 		ma.recorder.measure("Series", ma.timeNow().Sub(t0), err)
 	}(ma.timeNow())
-	return ma.api.Series(ctx, matches, startTime, endTime)
+	return ma.api.Series(ctx, matches, startTime, endTime, opts...)
 }
 
-func (ma *MeasuredAPI) LabelNames(ctx context.Context, matches []string, startTime, endTime time.Time) (s []string, w v1.Warnings, err error) {
+func (ma *MeasuredAPI) LabelNames(ctx context.Context, matches []string, startTime, endTime time.Time, opts ...v1.Option) (s []string, w v1.Warnings, err error) {
 	sp, ctx := opentracing.StartSpanFromContextWithTracer(ctx, ma.tracer, "remoteread.LabelNames")
 	defer sp.Finish()
 	sp.LogKV("matches", strings.Join(matches, ","), "startTime", startTime, "endTime", endTime)
@@ -74,10 +74,10 @@ func (ma *MeasuredAPI) LabelNames(ctx context.Context, matches []string, startTi
 	defer func(t0 time.Time) {
 		ma.recorder.measure("LabelNames", ma.timeNow().Sub(t0), err)
 	}(ma.timeNow())
-	return ma.api.LabelNames(ctx, matches, startTime, endTime)
+	return ma.api.LabelNames(ctx, matches, startTime, endTime, opts...)
 }
 
-func (ma *MeasuredAPI) LabelValues(ctx context.Context, label string, matches []string, startTime, endTime time.Time) (v model.LabelValues, w v1.Warnings, err error) {
+func (ma *MeasuredAPI) LabelValues(ctx context.Context, label string, matches []string, startTime, endTime time.Time, opts ...v1.Option) (v model.LabelValues, w v1.Warnings, err error) {
 	sp, ctx := opentracing.StartSpanFromContextWithTracer(ctx, ma.tracer, "remoteread.LabelValues")
 	defer sp.Finish()
 	sp.LogKV("label", label, "matches", strings.Join(matches, ","), "startTime", startTime, "endTime", endTime)
@@ -85,5 +85,5 @@ func (ma *MeasuredAPI) LabelValues(ctx context.Context, label string, matches []
 	defer func(t0 time.Time) {
 		ma.recorder.measure("LabelValues", ma.timeNow().Sub(t0), err)
 	}(ma.timeNow())
-	return ma.api.LabelValues(ctx, label, matches, startTime, endTime)
+	return ma.api.LabelValues(ctx, label, matches, startTime, endTime, opts...)
 }
