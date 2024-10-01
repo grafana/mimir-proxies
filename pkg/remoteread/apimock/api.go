@@ -19,12 +19,19 @@ type API struct {
 }
 
 // LabelNames provides a mock function with given fields: ctx, matches, startTime, endTime
-func (_m *API) LabelNames(ctx context.Context, matches []string, startTime time.Time, endTime time.Time) ([]string, v1.Warnings, error) {
-	ret := _m.Called(ctx, matches, startTime, endTime)
+func (_m *API) LabelNames(ctx context.Context, matches []string, startTime time.Time, endTime time.Time, opts ...v1.Option) ([]string, v1.Warnings, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, query, ts)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	var r0 []string
-	if rf, ok := ret.Get(0).(func(context.Context, []string, time.Time, time.Time) []string); ok {
-		r0 = rf(ctx, matches, startTime, endTime)
+	if rf, ok := ret.Get(0).(func(context.Context, []string, time.Time, time.Time, ...v1.Option) []string); ok {
+		r0 = rf(ctx, matches, startTime, endTime, opts...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
@@ -32,8 +39,8 @@ func (_m *API) LabelNames(ctx context.Context, matches []string, startTime time.
 	}
 
 	var r1 v1.Warnings
-	if rf, ok := ret.Get(1).(func(context.Context, []string, time.Time, time.Time) v1.Warnings); ok {
-		r1 = rf(ctx, matches, startTime, endTime)
+	if rf, ok := ret.Get(1).(func(context.Context, []string, time.Time, time.Time, ...v1.Option) v1.Warnings); ok {
+		r1 = rf(ctx, matches, startTime, endTime, opts...)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(v1.Warnings)
@@ -41,8 +48,8 @@ func (_m *API) LabelNames(ctx context.Context, matches []string, startTime time.
 	}
 
 	var r2 error
-	if rf, ok := ret.Get(2).(func(context.Context, []string, time.Time, time.Time) error); ok {
-		r2 = rf(ctx, matches, startTime, endTime)
+	if rf, ok := ret.Get(2).(func(context.Context, []string, time.Time, time.Time, ...v1.Option) error); ok {
+		r2 = rf(ctx, matches, startTime, endTime, opts...)
 	} else {
 		r2 = ret.Error(2)
 	}
@@ -51,12 +58,19 @@ func (_m *API) LabelNames(ctx context.Context, matches []string, startTime time.
 }
 
 // LabelValues provides a mock function with given fields: ctx, label, matches, startTime, endTime
-func (_m *API) LabelValues(ctx context.Context, label string, matches []string, startTime time.Time, endTime time.Time) (model.LabelValues, v1.Warnings, error) {
-	ret := _m.Called(ctx, label, matches, startTime, endTime)
+func (_m *API) LabelValues(ctx context.Context, label string, matches []string, startTime time.Time, endTime time.Time, opts ...v1.Option) (model.LabelValues, v1.Warnings, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, query, ts)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	var r0 model.LabelValues
-	if rf, ok := ret.Get(0).(func(context.Context, string, []string, time.Time, time.Time) model.LabelValues); ok {
-		r0 = rf(ctx, label, matches, startTime, endTime)
+	if rf, ok := ret.Get(0).(func(context.Context, string, []string, time.Time, time.Time, ...v1.Option) model.LabelValues); ok {
+		r0 = rf(ctx, label, matches, startTime, endTime, opts...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(model.LabelValues)
@@ -64,8 +78,8 @@ func (_m *API) LabelValues(ctx context.Context, label string, matches []string, 
 	}
 
 	var r1 v1.Warnings
-	if rf, ok := ret.Get(1).(func(context.Context, string, []string, time.Time, time.Time) v1.Warnings); ok {
-		r1 = rf(ctx, label, matches, startTime, endTime)
+	if rf, ok := ret.Get(1).(func(context.Context, string, []string, time.Time, time.Time, ...v1.Option) v1.Warnings); ok {
+		r1 = rf(ctx, label, matches, startTime, endTime, opts...)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(v1.Warnings)
@@ -73,8 +87,8 @@ func (_m *API) LabelValues(ctx context.Context, label string, matches []string, 
 	}
 
 	var r2 error
-	if rf, ok := ret.Get(2).(func(context.Context, string, []string, time.Time, time.Time) error); ok {
-		r2 = rf(ctx, label, matches, startTime, endTime)
+	if rf, ok := ret.Get(2).(func(context.Context, string, []string, time.Time, time.Time, ...v1.Option) error); ok {
+		r2 = rf(ctx, label, matches, startTime, endTime, opts...)
 	} else {
 		r2 = ret.Error(2)
 	}
@@ -161,12 +175,19 @@ func (_m *API) QueryRange(ctx context.Context, query string, r v1.Range, opts ..
 }
 
 // Series provides a mock function with given fields: ctx, matches, startTime, endTime
-func (_m *API) Series(ctx context.Context, matches []string, startTime time.Time, endTime time.Time) ([]model.LabelSet, v1.Warnings, error) {
-	ret := _m.Called(ctx, matches, startTime, endTime)
+func (_m *API) Series(ctx context.Context, matches []string, startTime time.Time, endTime time.Time, opts ...v1.Option) ([]model.LabelSet, v1.Warnings, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, query, r)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	var r0 []model.LabelSet
-	if rf, ok := ret.Get(0).(func(context.Context, []string, time.Time, time.Time) []model.LabelSet); ok {
-		r0 = rf(ctx, matches, startTime, endTime)
+	if rf, ok := ret.Get(0).(func(context.Context, []string, time.Time, time.Time, ...v1.Option) []model.LabelSet); ok {
+		r0 = rf(ctx, matches, startTime, endTime, opts...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]model.LabelSet)
@@ -174,8 +195,8 @@ func (_m *API) Series(ctx context.Context, matches []string, startTime time.Time
 	}
 
 	var r1 v1.Warnings
-	if rf, ok := ret.Get(1).(func(context.Context, []string, time.Time, time.Time) v1.Warnings); ok {
-		r1 = rf(ctx, matches, startTime, endTime)
+	if rf, ok := ret.Get(1).(func(context.Context, []string, time.Time, time.Time, ...v1.Option) v1.Warnings); ok {
+		r1 = rf(ctx, matches, startTime, endTime, opts...)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(v1.Warnings)
@@ -183,8 +204,8 @@ func (_m *API) Series(ctx context.Context, matches []string, startTime time.Time
 	}
 
 	var r2 error
-	if rf, ok := ret.Get(2).(func(context.Context, []string, time.Time, time.Time) error); ok {
-		r2 = rf(ctx, matches, startTime, endTime)
+	if rf, ok := ret.Get(2).(func(context.Context, []string, time.Time, time.Time, ...v1.Option) error); ok {
+		r2 = rf(ctx, matches, startTime, endTime, opts...)
 	} else {
 		r2 = ret.Error(2)
 	}
