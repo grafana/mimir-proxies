@@ -27,3 +27,9 @@ packages-minor-autoupdate:
 				and . != \"github.com/prometheus/prometheus\" \
 			))" \
 		| tr -d '\n' | tr -d '  '
+
+.PHONY: assert-no-changed-files
+assert-no-changed-files:
+	@git update-index --refresh
+	@git diff-index --quiet HEAD --
+
