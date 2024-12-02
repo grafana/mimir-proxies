@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"go.opentelemetry.io/otel/trace"
 	"testing"
 
 	opentracing "github.com/opentracing/opentracing-go"
@@ -13,6 +12,7 @@ import (
 	"go.opentelemetry.io/otel"
 	bridge "go.opentelemetry.io/otel/bridge/opentracing"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 )
 
 func TestExtractSampledTraceID(t *testing.T) {
@@ -118,7 +118,7 @@ func getContextWithOpenTelemetry(t *testing.T) (context.Context, func()) {
 }
 
 func getContextWithOpenTelemetryNoop(t *testing.T) (context.Context, func()) {
-	ctx, sp := trace.NewNoopTracerProvider().Tracer("test").Start(context.Background(), "test")
+	ctx, sp := noop.NewTracerProvider().Tracer("test").Start(context.Background(), "test")
 
 	// sanity check
 	require.False(t, sp.SpanContext().TraceID().IsValid())

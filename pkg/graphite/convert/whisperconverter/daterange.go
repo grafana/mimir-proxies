@@ -99,7 +99,7 @@ READLOOP:
 		terms = append(terms, fmt.Sprintf("--end-date %s", time.UnixMilli(maxTS).UTC().Format("2006-01-02")))
 	}
 	terms = append(terms, "\n")
-	fmt.Printf(strings.Join(terms, " "))
+	fmt.Printf("%s", strings.Join(terms, " "))
 
 	wg.Done()
 }

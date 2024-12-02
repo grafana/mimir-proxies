@@ -48,7 +48,8 @@ func TestStorageQueryable_Querier_Select(t *testing.T) {
 		app := storage.Appender(ctx)
 		for ts := int64(0); ts < 5; ts++ {
 			const unknownRef = 0
-			app.Append(unknownRef, metricWithDashInTag, ts*60e3, float64(ts)+1)
+			_, err := app.Append(unknownRef, metricWithDashInTag, ts*60e3, float64(ts)+1)
+			require.NoError(t, err)
 		}
 		require.NoError(t, app.Commit())
 	}
@@ -190,7 +191,7 @@ func TestStorageQueryable_Querier_LabelValues(t *testing.T) {
 						return
 					}
 				}
-				json.NewEncoder(writer).Encode(struct{ Data []string }{Data: expectedValues})
+				require.NoError(t, json.NewEncoder(writer).Encode(struct{ Data []string }{Data: expectedValues}))
 			}))
 			srv := httptest.NewServer(router)
 			defer srv.Close()
@@ -243,7 +244,7 @@ func TestStorageQueryable_Querier_LabelNames(t *testing.T) {
 				return
 			}
 		}
-		json.NewEncoder(writer).Encode(struct{ Data []string }{Data: expectedNames})
+		require.NoError(t, json.NewEncoder(writer).Encode(struct{ Data []string }{Data: expectedNames}))
 	}))
 	srv := httptest.NewServer(router)
 	defer srv.Close()
