@@ -16,7 +16,7 @@ permissions:
   repository-projects: read
 
 env:
-  DEFAULT_GO_VERSION: 1.21
+  DEFAULT_GO_VERSION: 1.23
 
 name: Build Artifacts
 jobs:
