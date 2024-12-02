@@ -25,7 +25,7 @@ require (
 	github.com/prometheus/common v0.60.1
 	github.com/prometheus/prometheus v1.99.0
 	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.opentelemetry.io/otel v1.32.0
