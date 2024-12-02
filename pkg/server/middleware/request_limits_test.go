@@ -69,13 +69,13 @@ type errReader struct {
 	mock.Mock
 }
 
-func (m errReader) Read(p []byte) (n int, err error) {
+func (m *errReader) Read(p []byte) (n int, err error) {
 	args := m.Called(p)
 	return args.Int(0), args.Error(1)
 }
 
 type TimeoutError struct {
-	error
+	error //nolint:unused
 }
 
 func (e TimeoutError) Timeout() bool {

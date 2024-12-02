@@ -101,7 +101,7 @@ func (s *APISuite) SetupTest() {
 
 	s.shutdownF = s.srv.Shutdown
 
-	go s.srv.Run()
+	go s.Require().NoError(s.srv.Run())
 
 	// Wait until the server is up before returning.
 	for {

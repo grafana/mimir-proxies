@@ -30,11 +30,11 @@ func TestCommandPass2(t *testing.T) {
 	data2 := createData([]string{"my.cool.metric", "something.else", "unique.metric"})
 	data3 := createData([]string{"my.cool.metric", "something.else", "what.does.the.fox.say"})
 
-	err = createIntermediate(tmpIntermediateDir+"/2022-08-01.intermediate", data1, true)
+	err = createIntermediate(tmpIntermediateDir+"/2022-08-01.intermediate", data1)
 	require.NoError(t, err)
-	err = createIntermediate(tmpIntermediateDir+"/2022-08-02.intermediate", data2, true)
+	err = createIntermediate(tmpIntermediateDir+"/2022-08-02.intermediate", data2)
 	require.NoError(t, err)
-	err = createIntermediate(tmpIntermediateDir+"/2022-08-03.intermediate", data3, true)
+	err = createIntermediate(tmpIntermediateDir+"/2022-08-03.intermediate", data3)
 	require.NoError(t, err)
 
 	dates := make([]time.Time, 0)
@@ -112,7 +112,7 @@ func createData(metricNames []string) map[string]*mimirpb.TimeSeries {
 
 // createIntermediate generates an intermediate file in the given path,
 // writing the given time series to the file.
-func createIntermediate(path string, data map[string]*mimirpb.TimeSeries, closeTable bool) error {
+func createIntermediate(path string, data map[string]*mimirpb.TimeSeries) error {
 	table, err := convert.NewUSTableForAppend(path, true, convert.NewMimirSeriesProto, log.NewNopLogger())
 	if err != nil {
 		return err

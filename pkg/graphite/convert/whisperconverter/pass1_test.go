@@ -98,7 +98,7 @@ func TestCommandPass1(t *testing.T) {
 				log.NewNopLogger(),
 			)
 
-			c.CommandPass1("", tmpIntermediateDir, true)
+			require.NoError(t, c.CommandPass1("", tmpIntermediateDir, true))
 
 			actualFiles, err := ListFilesInDir(tmpIntermediateDir)
 			require.NoError(t, err)

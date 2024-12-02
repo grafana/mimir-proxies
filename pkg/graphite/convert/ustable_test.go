@@ -353,7 +353,7 @@ func TestIntermediatePartials(t *testing.T) {
 			goldenPath := filepath.Join(testFilePath, test.fname)
 			mutablePath := filepath.Join(testDir, test.fname)
 			// Copy golden files before use because we will be appending to them.
-			copyFile(goldenPath, mutablePath)
+			require.NoError(t, copyFile(goldenPath, mutablePath))
 
 			// First do a read test so we can recognize bad files.
 			i, err := NewUSTableForRead(mutablePath, NewMimirSeriesProto, logger)
