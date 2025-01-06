@@ -68,6 +68,11 @@ func TestGRPCStatusRoundTrip(t *testing.T) {
 			err:     TooManyRequests{Msg: "too much!"},
 			wantErr: TooManyRequests{Msg: "grpc ResourceExhausted: too much!"},
 		},
+		{
+			name:    "RequestTimeout",
+			err:     RequestTimeout{Msg: "client timeout"},
+			wantErr: RequestTimeout{Msg: "grpc DeadlineExceeded: client timeout"},
+		},
 	}
 
 	for _, tc := range tests {

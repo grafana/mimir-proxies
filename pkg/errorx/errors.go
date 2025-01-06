@@ -64,6 +64,8 @@ func FromGRPCStatus(s *grpcStatus.Status) error { //nolint:gocyclo
 				return TooManyRequests{Msg: msg}
 			case errorxpb.ErrorxType_UNSUPPORTED_MEDIA_TYPE:
 				return UnsupportedMediaType{Msg: msg}
+			case errorxpb.ErrorxType_REQUEST_TIMEOUT:
+				return RequestTimeout{Msg: msg}
 			default:
 				return Internal{Msg: "invalid errorx type specifier. " + msg}
 			}
@@ -402,6 +404,42 @@ func (e TooManyRequests) GRPCStatus() *grpcStatus.Status {
 func (e TooManyRequests) GRPCStatusDetails() []protov1.Message {
 	return []protov1.Message{&errorxpb.ErrorDetails{
 		Type: errorxpb.ErrorxType_TOO_MANY_REQUESTS,
+	}}
+}
+
+var _ Error = RequestTimeout{}
+
+type RequestTimeout struct {
+	Msg string
+	Err error
+}
+
+func (e RequestTimeout) Error() string {
+	if e.Err != nil {
+		return fmt.Sprintf("%s: %s", e.Msg, e.Err)
+	}
+	return e.Msg
+}
+
+func (e RequestTimeout) Message() string {
+	return e.Msg
+}
+
+func (e RequestTimeout) Unwrap() error {
+	return e.Err
+}
+
+func (e RequestTimeout) HTTPStatusCode() int {
+	return http.StatusRequestTimeout
+}
+
+func (e RequestTimeout) GRPCStatus() *grpcStatus.Status {
+	return WithErrorxTypeDetail(grpcStatus.New(codes.DeadlineExceeded, e.Error()), e.GRPCStatusDetails()...)
+}
+
+func (e RequestTimeout) GRPCStatusDetails() []protov1.Message {
+	return []protov1.Message{&errorxpb.ErrorDetails{
+		Type: errorxpb.ErrorxType_REQUEST_TIMEOUT,
 	}}
 }
 
