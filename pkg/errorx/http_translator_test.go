@@ -63,6 +63,10 @@ func TestLogAndSetHttpError(t *testing.T) {
 			expectedCode:    http.StatusInternalServerError,
 			expectedMessage: "unknown error",
 		},
+		"request timeout": {
+			err:          RequestTimeout{},
+			expectedCode: http.StatusRequestTimeout,
+		},
 	} {
 		logger := log.NewNopLogger()
 		recorder := httptest.NewRecorder()
