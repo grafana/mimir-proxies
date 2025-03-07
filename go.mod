@@ -9,7 +9,7 @@ require (
 	github.com/go-kit/log v0.2.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.4
-	github.com/golang/snappy v0.0.4
+	github.com/golang/snappy v1.0.0
 	github.com/gorilla/mux v1.8.1
 	github.com/grafana/dskit v0.0.0-20240229214108-b073df3747b2
 	github.com/grafana/metrictank v1.0.1-0.20230406204819-309ba74749c4
