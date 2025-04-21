@@ -1,6 +1,7 @@
 module github.com/grafana/mimir-proxies
 
 go 1.23
+toolchain go1.24.1
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20221031212613-62deef7fc822
@@ -157,7 +158,7 @@ require (
 	go.uber.org/goleak v1.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/mod v0.18.0 // indirect
 	golang.org/x/oauth2 v0.26.0 // indirect
