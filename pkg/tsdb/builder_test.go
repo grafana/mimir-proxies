@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/go-kit/log"
+	log2 "github.com/grafana/mimir/pkg/util/log"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/model/histogram"
 	"github.com/prometheus/prometheus/model/labels"
@@ -151,7 +152,7 @@ func TestCreateBlock(t *testing.T) {
 }
 
 func verifyBlock(t *testing.T, blockDir string, series map[string][]model.SamplePair) {
-	b, err := tsdb.OpenBlock(log.NewNopLogger(), blockDir, nil)
+	b, err := tsdb.OpenBlock(log2.SlogFromGoKit(log.NewNopLogger()), blockDir, nil, nil)
 	require.NoError(t, err)
 
 	// Let's verify that all expected series and their samples are found in the block
