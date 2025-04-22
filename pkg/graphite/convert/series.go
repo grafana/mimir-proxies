@@ -59,7 +59,7 @@ func (i *mimirSeriesIterator) Next() chunkenc.ValueType {
 // Seek looks for the next available sample whose timestamp is >= the requested
 // ts. See https://github.com/prometheus/prometheus/blob/main/tsdb/chunkenc/chunk.go#L79-L83
 // for details on Seek behavior.
-func (i *mimirSeriesIterator) Seek(ts int64) chunkenc.ValueType {
+func (i *mimirSeriesIterator) Seek(ts int64) chunkenc.ValueType { //nolint: govet
 	if i.err != nil {
 		return chunkenc.ValNone
 	}

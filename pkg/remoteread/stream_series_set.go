@@ -1,6 +1,7 @@
 package remoteread
 
 import (
+	"errors"
 	"io"
 
 	"github.com/prometheus/prometheus/model/histogram"
@@ -44,7 +45,7 @@ func (s *streamingSeriesSet) Next() bool {
 
 	err := s.chunkedReader.NextProto(res)
 	if err != nil {
-		if err != io.EOF {
+		if !errors.Is(err, io.EOF) {
 			s.err = err
 			_, _ = io.Copy(io.Discard, s.respBody)
 		}
@@ -152,7 +153,7 @@ func (it *streamingSeriesIterator) Next() chunkenc.ValueType {
 	return it.curType
 }
 
-func (it *streamingSeriesIterator) Seek(t int64) chunkenc.ValueType {
+func (it *streamingSeriesIterator) Seek(t int64) chunkenc.ValueType { //nolint:govet
 	if it.err != nil {
 		return chunkenc.ValNone
 	}

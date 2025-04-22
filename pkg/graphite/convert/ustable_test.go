@@ -187,7 +187,7 @@ func TestIntermediateHappyPaths(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, i.Close())
 
-	os.RemoveAll(testDir)
+	_ = os.RemoveAll(testDir)
 }
 
 // writeGoodFile, if true, will generate a new golden good.intermediate file.
@@ -379,7 +379,7 @@ func TestIntermediatePartials(t *testing.T) {
 			i, err = NewUSTableForAppend(mutablePath, false, NewMimirSeriesProto, logger)
 			require.Nil(t, err)
 			require.Equal(t, test.wantSeekPos, i.pos())
-			i.Close()
+			_ = i.Close()
 
 			// Now open for append. We should detect the good / resumable data.
 			i, m, err := NewUSTableForAppendWithIndex(mutablePath, false, NewMimirSeriesProto, logger)
@@ -411,7 +411,7 @@ func TestIntermediatePartials(t *testing.T) {
 		})
 	}
 
-	os.RemoveAll(testDir)
+	_ = os.RemoveAll(testDir)
 }
 
 func copyFile(src, dst string) error {

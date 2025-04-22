@@ -8,6 +8,7 @@ import (
 )
 
 // Storage specifies necessary methods to storage and fetch datadog host labels that are periodically sent by the agents
+//
 //go:generate mockery --case underscore --output htstoragemock --outpkg htstoragemock --name Storage
 //go:generate mockery --case underscore --inpackage --testonly --name Storage
 type Storage interface {

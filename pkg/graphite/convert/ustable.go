@@ -179,7 +179,7 @@ func (t *USTable) Close() error {
 			return err
 		}
 	}
-	t.fd.Close()
+	_ = t.fd.Close()
 	return nil
 }
 

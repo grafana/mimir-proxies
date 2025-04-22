@@ -90,7 +90,9 @@ func (c *WhisperConverter) createOneBlock(fname, blocksDir string) error {
 	if err != nil {
 		return err
 	}
-	defer i.Close()
+	defer func() {
+		_ = i.Close()
+	}()
 	index, err := i.Index()
 	if err != nil {
 		return err

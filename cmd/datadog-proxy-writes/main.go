@@ -46,7 +46,7 @@ func Run() (err error) {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Fprintf(os.Stdout, "%s\n", version)
+		_, _ = fmt.Fprintf(os.Stdout, "%s\n", version)
 		os.Exit(0)
 	}
 

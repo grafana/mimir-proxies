@@ -91,7 +91,7 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string, tracer open
 	// If the function fails, make sure all resources are cleaned up before returning the error.
 	defer func() {
 		if err != nil {
-			app.Close()
+			_ = app.Close()
 		}
 	}()
 

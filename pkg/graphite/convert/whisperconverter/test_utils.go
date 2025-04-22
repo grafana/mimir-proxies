@@ -22,7 +22,9 @@ func CreateWhisperFile(path string, timestamps []*time.Time) error {
 	if err != nil {
 		return err
 	}
-	defer wsp.Close()
+	defer func() {
+		_ = wsp.Close()
+	}()
 
 	for _, t := range timestamps {
 		err = wsp.Update(1.0, int(t.Unix()))

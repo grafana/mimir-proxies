@@ -154,7 +154,9 @@ func metricsJSON(r *http.Request) ([]*schema.MetricData, error) {
 		return nil, fmt.Errorf("no data included in request")
 	}
 
-	defer r.Body.Close()
+	defer func() {
+		_ = r.Body.Close()
+	}()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -163,7 +165,7 @@ func metricsJSON(r *http.Request) ([]*schema.MetricData, error) {
 	metrics := make([]*schema.MetricData, 0)
 	err = json.Unmarshal(body, &metrics)
 	if err != nil {
-		return nil, fmt.Errorf("invalid metric data received: %s", err)
+		return nil, fmt.Errorf("invalid metric data received: %w", err)
 	}
 
 	return metrics, nil
@@ -179,7 +181,9 @@ func metricsBinary(r *http.Request, compressed bool) ([]*schema.MetricData, erro
 	} else {
 		bodyReadCloser = r.Body
 	}
-	defer bodyReadCloser.Close()
+	defer func() {
+		_ = bodyReadCloser.Close()
+	}()
 
 	body, err := io.ReadAll(bodyReadCloser)
 	if err != nil {
@@ -188,12 +192,12 @@ func metricsBinary(r *http.Request, compressed bool) ([]*schema.MetricData, erro
 	metricData := new(msg.MetricData)
 	err = metricData.InitFromMsg(body)
 	if err != nil {
-		return nil, fmt.Errorf("invalid metric data received: %s", err)
+		return nil, fmt.Errorf("invalid metric data received: %w", err)
 	}
 
 	err = metricData.DecodeMetricData()
 	if err != nil {
-		return nil, fmt.Errorf("invalid metric data received:%s", err)
+		return nil, fmt.Errorf("invalid metric data received:%w", err)
 	}
 
 	return metricData.Metrics, nil

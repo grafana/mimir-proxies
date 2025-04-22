@@ -33,7 +33,9 @@ func (c *WhisperConverter) discoverTargetWhisperFiles(targetWhisperFiles string)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	w := bufio.NewWriter(f)
 

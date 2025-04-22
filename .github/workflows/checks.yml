@@ -7,7 +7,7 @@ on:
   pull_request:
 
 env:
-  GO_VERSION: "1.23"
+  GO_VERSION: "1.24"
 
 jobs:
   lint:
@@ -21,10 +21,10 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
-          args: --verbose  --timeout=3m
-          version: v1.60.1
+          args: --verbose --timeout=3m --modules-download-mode=mod
+          version: v2.0
 
   go-mod-tidy:
     runs-on: ubuntu-latest

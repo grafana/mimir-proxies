@@ -83,7 +83,7 @@ func getContextWithOpenTracing(t *testing.T) (context.Context, func()) {
 	sp := opentracing.GlobalTracer().StartSpan("test")
 	return opentracing.ContextWithSpan(context.Background(), sp), func() {
 		sp.Finish()
-		closer.Close()
+		_ = closer.Close()
 	}
 }
 

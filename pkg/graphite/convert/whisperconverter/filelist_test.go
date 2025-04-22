@@ -35,7 +35,9 @@ func TestCommandFileList(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			tmpDir, err := os.MkdirTemp("/tmp", "testCommandFileList*")
 			require.NoError(t, err)
-			defer os.RemoveAll(tmpDir)
+			defer func() {
+				_ = os.RemoveAll(tmpDir)
+			}()
 
 			for _, filename := range test.testFiles {
 				fullPath := tmpDir + "/" + filename
@@ -95,7 +97,9 @@ func getFileContents(filePath string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	output := make([]string, 0)
 
