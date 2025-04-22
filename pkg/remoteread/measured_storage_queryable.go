@@ -42,18 +42,18 @@ func (m *measuredStorageQuerier) Select(ctx context.Context, sortSeries bool, hi
 	return m.querier.Select(ctx, sortSeries, hints, matchers...)
 }
 
-func (m *measuredStorageQuerier) LabelValues(ctx context.Context, name string, matchers ...*labels.Matcher) (_ []string, _ annotations.Annotations, err error) {
+func (m *measuredStorageQuerier) LabelValues(ctx context.Context, name string, hints *storage.LabelHints, matchers ...*labels.Matcher) (_ []string, _ annotations.Annotations, err error) {
 	defer func(t0 time.Time) {
 		m.rec.measure("StorageQuerier.LabelValues", m.timeNow().Sub(t0), err)
 	}(m.timeNow())
-	return m.querier.LabelValues(ctx, name, matchers...)
+	return m.querier.LabelValues(ctx, name, hints, matchers...)
 }
 
-func (m *measuredStorageQuerier) LabelNames(ctx context.Context, matchers ...*labels.Matcher) (_ []string, _ annotations.Annotations, err error) {
+func (m *measuredStorageQuerier) LabelNames(ctx context.Context, hints *storage.LabelHints, matchers ...*labels.Matcher) (_ []string, _ annotations.Annotations, err error) {
 	defer func(t0 time.Time) {
 		m.rec.measure("StorageQuerier.LabelNames", m.timeNow().Sub(t0), err)
 	}(m.timeNow())
-	return m.querier.LabelNames(ctx, matchers...)
+	return m.querier.LabelNames(ctx, hints, matchers...)
 }
 
 func (m *measuredStorageQuerier) Series(ctx context.Context, matchers []string) (_ []map[string]string, err error) {

@@ -51,7 +51,7 @@ type remoteWriteResponse struct {
 func (wp *RemoteWriteProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log, _ := spanlogger.New(r.Context(), "graphiteWriter.ServeHTTP")
 	startTime := time.Now()
-	defer log.Span.Finish()
+	defer log.Finish()
 	ctx, userID := graphiteAuth.ExtractOrgID(r.Context())
 
 	metrics, err := extractMetricsFromRequest(r)
@@ -101,8 +101,8 @@ func (wp *RemoteWriteProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	wp.recorder.measureConversionDuration(userID, time.Since(beforeConversion))
 
 	req := mimirpb.WriteRequest{
-		Timeseries:              series,
-		SkipLabelNameValidation: true,
+		Timeseries:          series,
+		SkipLabelValidation: true,
 	}
 	defer mimirpb.ReuseSlice(req.Timeseries)
 

@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafana/mimir-proxies/pkg/errorx"
-	remotereadstorage "github.com/grafana/mimir-proxies/pkg/remoteread/storage"
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
 
-	"github.com/grafana/mimir-proxies/pkg/appcommon"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
+	remotereadstorage "github.com/grafana/mimir-proxies/pkg/remoteread/storage"
+
 	"github.com/mwitkow/go-conntrack"
 	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/api"
@@ -27,6 +27,8 @@ import (
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/storage/remote"
 	"github.com/prometheus/prometheus/util/annotations"
+
+	"github.com/grafana/mimir-proxies/pkg/appcommon"
 )
 
 const (
@@ -156,7 +158,7 @@ func (q *storageQuerier) Select(ctx context.Context, sortSeries bool, hints *sto
 	return res
 }
 
-func (q *storageQuerier) LabelValues(ctx context.Context, label string, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
+func (q *storageQuerier) LabelValues(ctx context.Context, label string, _ *storage.LabelHints, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
 	if parentSpan := opentracing.SpanFromContext(ctx); parentSpan != nil {
 		var span opentracing.Span
 		span, ctx = opentracing.StartSpanFromContextWithTracer(ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.LabelValues")
@@ -176,7 +178,7 @@ func (q *storageQuerier) LabelValues(ctx context.Context, label string, matchers
 	return labelValues.Data, nil, nil
 }
 
-func (q *storageQuerier) LabelNames(ctx context.Context, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
+func (q *storageQuerier) LabelNames(ctx context.Context, _ *storage.LabelHints, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
 	if parentSpan := opentracing.SpanFromContext(ctx); parentSpan != nil {
 		var span opentracing.Span
 		span, ctx = opentracing.StartSpanFromContextWithTracer(ctx, parentSpan.Tracer(), "remoteread.StorageQuerier.LabelNames")
