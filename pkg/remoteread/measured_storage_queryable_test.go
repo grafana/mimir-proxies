@@ -90,7 +90,7 @@ func (s *MeasuredStorageQueryableTestSuite) TestLabelNames_Success() {
 		Return(mockValue, mockWarnings, nil).Once()
 	s.recorderMock.On("measure", "StorageQuerier.LabelNames", s.someLatency, nil).Once()
 
-	actualValue, actualWarnings, err := s.underTest.LabelNames(context.Background(), matchers...)
+	actualValue, actualWarnings, err := s.underTest.LabelNames(context.Background(), nil, matchers...)
 
 	s.NoError(err)
 	s.Equal(mockValue, actualValue)
@@ -107,7 +107,7 @@ func (s *MeasuredStorageQueryableTestSuite) TestLabelValues_Success() {
 		Return(mockValue, mockWarnings, nil).Once()
 	s.recorderMock.On("measure", "StorageQuerier.LabelValues", s.someLatency, nil).Once()
 
-	actualValue, actualWarnings, err := s.underTest.LabelValues(context.Background(), labelName, matchers...)
+	actualValue, actualWarnings, err := s.underTest.LabelValues(context.Background(), labelName, nil, matchers...)
 
 	s.NoError(err)
 	s.Equal(mockValue, actualValue)

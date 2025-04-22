@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/prometheus/prometheus/promql/promqltest"
+
 	"github.com/grafana/mimir-proxies/pkg/errorx"
 
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
@@ -24,7 +26,6 @@ import (
 	"github.com/grafana/dskit/user"
 	"github.com/prometheus/prometheus/config"
 	"github.com/prometheus/prometheus/model/labels"
-	"github.com/prometheus/prometheus/promql"
 	"github.com/prometheus/prometheus/storage/remote"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,7 +35,7 @@ func TestStorageQueryable_Querier_Select(t *testing.T) {
 	const tenantID = "42"
 	ctx := user.InjectOrgID(context.Background(), tenantID)
 
-	storage := promql.LoadedStorage(t, `
+	storage := promqltest.LoadedStorage(t, `
 		load 1m
 			test_metric1{foo="bar",baz="qux"} 1+1x5
 	`)
@@ -156,7 +157,7 @@ func TestStorageQueryable_Querier_LabelValues(t *testing.T) {
 		{
 			name: "with matchers",
 			doRequest: func(ctx context.Context, querier storage.LabelQuerier) ([]string, annotations.Annotations, error) {
-				return querier.LabelValues(ctx, "mylabelname", labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
+				return querier.LabelValues(ctx, "mylabelname", nil, labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
 			},
 			expectedQueryParams: map[string]string{
 				"start":   "60",
@@ -167,7 +168,7 @@ func TestStorageQueryable_Querier_LabelValues(t *testing.T) {
 		{
 			name: "without matchers",
 			doRequest: func(ctx context.Context, querier storage.LabelQuerier) ([]string, annotations.Annotations, error) {
-				return querier.LabelValues(ctx, "mylabelname")
+				return querier.LabelValues(ctx, "mylabelname", nil)
 			},
 			expectedQueryParams: map[string]string{
 				"start":   "60",
@@ -268,7 +269,7 @@ func TestStorageQueryable_Querier_LabelNames(t *testing.T) {
 	require.NoError(t, err)
 	defer querier.Close()
 
-	values, _, err := querier.LabelNames(ctx, labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
+	values, _, err := querier.LabelNames(ctx, nil, labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
 	require.NoError(t, err)
 	assert.Equal(t, expectedNames, values)
 }
@@ -277,7 +278,7 @@ func TestStorageQueryable_DecoratedRoundtripper(t *testing.T) {
 	const tenantID = "42"
 	ctx := user.InjectOrgID(context.Background(), tenantID)
 
-	storage := promql.LoadedStorage(t, `
+	storage := promqltest.LoadedStorage(t, `
 		load 1m
 			test_metric1{foo="bar",baz="qux"} 1+1x5
 	`)

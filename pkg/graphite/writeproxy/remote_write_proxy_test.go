@@ -43,7 +43,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 				},
 			},
 			reqValidation: func(req *mimirpb.WriteRequest) bool {
-				return req.SkipLabelNameValidation == true
+				return req.SkipLabelValidation == true
 			},
 			recorderMock: func() *MockRecorder {
 				recorderMock := &MockRecorder{}
@@ -73,7 +73,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 							},
 						},
 					},
-					SkipLabelNameValidation: true,
+					SkipLabelValidation: true,
 				}).Return(nil)
 				return remoteWriteMock
 			},
@@ -94,7 +94,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 				},
 			},
 			reqValidation: func(req *mimirpb.WriteRequest) bool {
-				return req.SkipLabelNameValidation == true
+				return req.SkipLabelValidation == true
 			},
 			recorderMock: func() *MockRecorder {
 				recorderMock := &MockRecorder{}
@@ -124,7 +124,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 							},
 						},
 					},
-					SkipLabelNameValidation: true,
+					SkipLabelValidation: true,
 				}).Return(nil)
 				return remoteWriteMock
 			},
@@ -176,7 +176,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 							},
 						},
 					},
-					SkipLabelNameValidation: true,
+					SkipLabelValidation: true,
 				}).Return(errorx.TooManyRequests{Msg: "simulating rate limited"})
 				return remoteWriteMock
 			},
@@ -228,7 +228,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 							},
 						},
 					},
-					SkipLabelNameValidation: true,
+					SkipLabelValidation: true,
 				}).Return(errorx.BadRequest{Msg: "simulating bad request"})
 				return remoteWriteMock
 			},
@@ -279,7 +279,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 							},
 						},
 					},
-					SkipLabelNameValidation: true,
+					SkipLabelValidation: true,
 				}).Return(nil)
 				return remoteWriteMock
 			},
@@ -330,7 +330,7 @@ func TestRemoteWriteMetricsHandler(t *testing.T) {
 							},
 						},
 					},
-					SkipLabelNameValidation: true,
+					SkipLabelValidation: true,
 				}).Return(nil)
 				return remoteWriteMock
 			},
