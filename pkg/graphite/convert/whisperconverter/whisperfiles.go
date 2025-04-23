@@ -35,7 +35,9 @@ func (c *WhisperConverter) getWhisperListIntoChan(targetWhisperFiles string, fil
 		if err != nil {
 			_ = level.Error(c.logger).Log("msg", "problem opening input file list", "file", targetWhisperFiles, "err", err)
 		}
-		defer f.Close()
+		defer func() {
+			_ = f.Close()
+		}()
 
 		scanner := bufio.NewScanner(f)
 		for scanner.Scan() {
@@ -59,7 +61,7 @@ func (c *WhisperConverter) getMetricName(file string) string {
 		file = file[1:]
 	}
 
-	return c.namePrefix + strings.Replace(strings.TrimSuffix(file, filepath.Ext(file)), "/", ".", -1)
+	return c.namePrefix + strings.ReplaceAll(strings.TrimSuffix(file, filepath.Ext(file)), "/", ".")
 }
 
 func (c *WhisperConverter) isMatchingFile(path string, d fs.DirEntry) bool {

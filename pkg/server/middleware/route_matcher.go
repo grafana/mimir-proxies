@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
@@ -21,7 +22,7 @@ func getRouteName(routeMatcher RouteMatcher, r *http.Request) string {
 		return ""
 	}
 
-	if routeMatch.MatchErr == mux.ErrNotFound {
+	if errors.Is(routeMatch.MatchErr, mux.ErrNotFound) {
 		return "notfound"
 	}
 

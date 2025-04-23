@@ -22,12 +22,13 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/grafana/dskit/user"
-	"github.com/grafana/mimir-proxies/pkg/ctxlog"
-	"github.com/grafana/mimir-proxies/pkg/errorx"
-	"github.com/grafana/mimir-proxies/pkg/server"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/grafana/mimir-proxies/pkg/ctxlog"
+	"github.com/grafana/mimir-proxies/pkg/errorx"
+	"github.com/grafana/mimir-proxies/pkg/server"
 )
 
 var errMap = map[string]struct {
@@ -109,7 +110,7 @@ func (s *APISuite) SetupTest() {
 	// Wait until the server is up before returning.
 	for {
 		resp := s.get("/")
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if resp.StatusCode == http.StatusNotFound {
 			break
 		}
@@ -393,7 +394,9 @@ func (s *APISuite) get(path string) *http.Response {
 
 func (s *APISuite) getJSON(path string) map[string]interface{} {
 	resp := s.get(path)
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	if !s.Equal([]string{"application/json"}, resp.Header["Content-Type"]) {
 		allBody, _ := io.ReadAll(resp.Body)
 		s.FailNow("Response was not a json", "Body: %s", string(allBody))

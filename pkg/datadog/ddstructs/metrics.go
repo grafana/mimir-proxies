@@ -34,7 +34,7 @@ func (f *Float64MaybeStringJSON) UnmarshalJSON(buf []byte) error {
 	if err := json.Unmarshal(buf, &floatVal); err != nil {
 		var strVal string
 		if strUnmarshalErr := json.Unmarshal(buf, &strVal); strUnmarshalErr != nil {
-			return fmt.Errorf("can't unmarshal value as float64 (%s) or as string (%w)", err, strUnmarshalErr)
+			return fmt.Errorf("can't unmarshal value as float64 (%w) or as string (%w)", err, strUnmarshalErr)
 		}
 		floatVal, err = strconv.ParseFloat(strVal, 64) //nolint:gomnd
 		if err != nil {

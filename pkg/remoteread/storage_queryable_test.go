@@ -82,7 +82,9 @@ func TestStorageQueryable_Querier_Select(t *testing.T) {
 
 	querier, err := client.Querier(60e3, 120e3)
 	require.NoError(t, err)
-	defer querier.Close()
+	defer func() {
+		_ = querier.Close()
+	}()
 
 	t.Run("happy case", func(t *testing.T) {
 		set := querier.Select(ctx, true, nil, labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
@@ -139,7 +141,9 @@ func TestStorageQueryable_Querier_TooManyRequests(t *testing.T) {
 
 	querier, err := client.Querier(60e3, 120e3)
 	require.NoError(t, err)
-	defer querier.Close()
+	defer func() {
+		_ = querier.Close()
+	}()
 
 	set := querier.Select(ctx, true, nil, labels.MustNewMatcher(labels.MatchEqual, "has-dash", "true"))
 	require.Error(t, set.Err())
@@ -214,7 +218,9 @@ func TestStorageQueryable_Querier_LabelValues(t *testing.T) {
 
 			querier, err := client.Querier(60e3, 120e3)
 			require.NoError(t, err)
-			defer querier.Close()
+			defer func() {
+				_ = querier.Close()
+			}()
 
 			values, _, err := tc.doRequest(ctx, querier)
 			require.NoError(t, err)
@@ -267,7 +273,9 @@ func TestStorageQueryable_Querier_LabelNames(t *testing.T) {
 
 	querier, err := client.Querier(60e3, 120e3)
 	require.NoError(t, err)
-	defer querier.Close()
+	defer func() {
+		_ = querier.Close()
+	}()
 
 	values, _, err := querier.LabelNames(ctx, nil, labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
 	require.NoError(t, err)
@@ -326,7 +334,9 @@ func TestStorageQueryable_DecoratedRoundtripper(t *testing.T) {
 
 		querier, err := client.Querier(60e3, 120e3)
 		require.NoError(t, err)
-		defer querier.Close()
+		defer func() {
+			_ = querier.Close()
+		}()
 		set := querier.Select(ctx, true, nil, labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
 		require.NoError(t, set.Err())
 	})
@@ -352,7 +362,9 @@ func TestStorageQueryable_DecoratedRoundtripper(t *testing.T) {
 
 		querier, err := client.Querier(60e3, 120e3)
 		require.NoError(t, err)
-		defer querier.Close()
+		defer func() {
+			_ = querier.Close()
+		}()
 		set := querier.Select(ctx, true, nil, labels.MustNewMatcher(labels.MatchEqual, "foo", "bar"))
 		require.NoError(t, set.Err())
 	})

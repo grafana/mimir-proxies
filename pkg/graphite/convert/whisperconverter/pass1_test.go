@@ -50,11 +50,15 @@ func TestCommandPass1(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			tmpInDir, err := os.MkdirTemp("/tmp", test.name+"-in-*")
 			require.NoError(t, err)
-			defer os.RemoveAll(tmpInDir)
+			defer func() {
+				_ = os.RemoveAll(tmpInDir)
+			}()
 
 			tmpIntermediateDir, err := os.MkdirTemp("/tmp", test.name+"-intermediate-*")
 			require.NoError(t, err)
-			defer os.RemoveAll(tmpInDir)
+			defer func() {
+				_ = os.RemoveAll(tmpInDir)
+			}()
 
 			asdfTimes, err := ToTimes([]string{
 				"2022-05-01",

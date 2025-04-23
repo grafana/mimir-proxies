@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-kit/log"
+	"github.com/pkg/errors"
 
 	"github.com/go-kit/log/level"
 
@@ -166,7 +167,7 @@ func (s *Server) Run() error {
 		level.Info(s.log).Log("msg", "Starting grpc server", "addr", s.grpcListener.Addr().String())
 
 		err := s.GRPCServer.Serve(s.grpcListener)
-		if err == grpc.ErrServerStopped {
+		if errors.Is(err, grpc.ErrServerStopped) {
 			err = nil
 		}
 

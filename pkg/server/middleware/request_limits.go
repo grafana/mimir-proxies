@@ -3,13 +3,13 @@ package middleware
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 
 	"github.com/go-kit/log"
-	"github.com/pkg/errors"
 
 	"github.com/go-kit/log/level"
 	"github.com/grafana/mimir/pkg/util/spanlogger"
@@ -72,6 +72,7 @@ func isNetworkError(err error) bool {
 		return false
 	}
 
-	netErr, ok := errors.Cause(err).(net.Error)
+	var netErr net.Error
+	ok := errors.As(err, &netErr)
 	return ok && netErr.Timeout()
 }

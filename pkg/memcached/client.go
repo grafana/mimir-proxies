@@ -32,6 +32,7 @@ func (c *Config) RegisterFlags(flags *flag.FlagSet) {
 // RegisterFlagsWithPrefix registers flags, adding the provided prefix if
 // needed. If the prefix is not blank and doesn't end with '.', a '.' is
 // appended to it.
+//
 //nolint:gomnd
 func (c *Config) RegisterFlagsWithPrefix(prefix string, flags *flag.FlagSet) {
 	if prefix != "" && !strings.HasSuffix(prefix, ".") {

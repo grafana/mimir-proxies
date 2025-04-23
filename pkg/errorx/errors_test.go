@@ -2,12 +2,14 @@ package errorx
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
-	"github.com/grafana/mimir-proxies/pkg/errorxpb"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
+
+	"github.com/grafana/mimir-proxies/pkg/errorxpb"
 
 	grpcStatus "google.golang.org/grpc/status"
 )
@@ -80,13 +82,11 @@ func TestGRPCStatusRoundTrip(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			s := tc.err.GRPCStatus()
 			got := FromGRPCStatus(s)
-			gotErrx, ok := got.(Error)
+			var gotErrx Error
+			ok := errors.As(got, &gotErrx)
 			require.True(t, ok)
 
 			require.Equal(t, tc.wantErr.Message(), gotErrx.Message())
-			if proxyRequest, ok := tc.wantErr.(RequiresProxyRequest); ok {
-				require.Equal(t, got.(RequiresProxyRequest).Reason, proxyRequest.Reason)
-			}
 			require.ErrorAs(t, got, &tc.wantErr)
 		})
 	}
@@ -138,13 +138,16 @@ func TestFromGRPCStatusErrors(t *testing.T) {
 				require.Nil(t, got)
 				return
 			}
-			gotErrx, okGot := got.(Error)
-			wantErrx, okWant := tc.wantErr.(Error)
+			var gotErrx Error
+			okGot := errors.As(got, &gotErrx)
+			var wantErrx Error
+			okWant := errors.As(tc.wantErr, &wantErrx)
 			require.Equal(t, okWant, okGot)
 			if okGot {
 				require.Equal(t, gotErrx.Message(), wantErrx.Message())
-				if proxyRequest, ok := wantErrx.(RequiresProxyRequest); ok {
-					require.Equal(t, got.(RequiresProxyRequest).Reason, proxyRequest.Reason)
+				var proxyRequest RequiresProxyRequest
+				if errors.As(wantErrx, &proxyRequest) {
+					require.Equal(t, got.(RequiresProxyRequest).Reason, proxyRequest.Reason) //nolint: errorlint
 				}
 			} else {
 				require.Equal(t, tc.wantErr, got)
