@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/grafana/mimir-proxies/compare/v1.1.2...v1.2.0) (2025-04-23)
+
+
+### Features
+
+* **errorx:** add Request Timeout http error handling ([#245](https://github.com/grafana/mimir-proxies/issues/245)) ([ad9a596](https://github.com/grafana/mimir-proxies/commit/ad9a596b493bd65bf91f1356a01e00e2d63f9669))
+* utilities for manipulating blocks ([#152](https://github.com/grafana/mimir-proxies/issues/152)) ([9e2e794](https://github.com/grafana/mimir-proxies/commit/9e2e7946c33b256ee474b804b42e58c0da61bf82))
+
+
+### Bug Fixes
+
+* add optional params to remoteread api for client_golang 1.20.x ([#207](https://github.com/grafana/mimir-proxies/issues/207)) ([03b451c](https://github.com/grafana/mimir-proxies/commit/03b451cc4a0816fce917bac7dc683bb526f4a2d7))
+
 ## [1.1.2](https://github.com/grafana/mimir-proxies/compare/v1.1.1...v1.1.2) (2024-03-19)
 
 
