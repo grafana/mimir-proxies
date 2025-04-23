@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/grafana/mimir/pkg/mimirpb"
+	log2 "github.com/grafana/mimir/pkg/util/log"
 	"github.com/kisielk/whisper-go/whisper"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/storage"
@@ -633,7 +634,7 @@ func TestConvertToMimirBlocks(t *testing.T) {
 		series,
 		blockDir,
 		30*time.Second.Milliseconds(),
-		log.NewNopLogger(),
+		log2.SlogFromGoKit(log.NewNopLogger()),
 	)
 	require.Nil(t, err)
 

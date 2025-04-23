@@ -184,7 +184,7 @@ CALLS:
 	return nil
 }
 
-func (m *MockQueryable) LabelValues(_ context.Context, labelName string, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
+func (m *MockQueryable) LabelValues(_ context.Context, labelName string, _ *storage.LabelHints, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -211,7 +211,7 @@ func (m *MockQueryable) LabelValues(_ context.Context, labelName string, matcher
 	return nil, nil, nil
 }
 
-func (m *MockQueryable) LabelNames(context.Context, ...*labels.Matcher) ([]string, annotations.Annotations, error) {
+func (m *MockQueryable) LabelNames(ctx context.Context, _ *storage.LabelHints, matchers ...*labels.Matcher) ([]string, annotations.Annotations, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

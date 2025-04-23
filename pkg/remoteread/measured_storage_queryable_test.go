@@ -85,12 +85,12 @@ func (s *MeasuredStorageQueryableTestSuite) TestLabelNames_Success() {
 	matchers := []*labels.Matcher{labels.MustNewMatcher(labels.MatchEqual, "foo", "bar")}
 	mockValue := []string{"foobar"}
 	mockWarnings := annotations.Annotations{}
-	s.querierMock.On("LabelNames", mock.Anything, matchers[0]).
+	s.querierMock.On("LabelNames", mock.Anything, mock.Anything, matchers[0]).
 		Run(s.addSomeLatency()).
 		Return(mockValue, mockWarnings, nil).Once()
 	s.recorderMock.On("measure", "StorageQuerier.LabelNames", s.someLatency, nil).Once()
 
-	actualValue, actualWarnings, err := s.underTest.LabelNames(context.Background(), matchers...)
+	actualValue, actualWarnings, err := s.underTest.LabelNames(context.Background(), nil, matchers...)
 
 	s.NoError(err)
 	s.Equal(mockValue, actualValue)
@@ -102,12 +102,12 @@ func (s *MeasuredStorageQueryableTestSuite) TestLabelValues_Success() {
 	matchers := []*labels.Matcher{labels.MustNewMatcher(labels.MatchEqual, "foo", "bar")}
 	mockValue := []string{"foo", "bar"}
 	mockWarnings := annotations.Annotations{}
-	s.querierMock.On("LabelValues", mock.Anything, labelName, matchers[0]).
+	s.querierMock.On("LabelValues", mock.Anything, labelName, mock.Anything, matchers[0]).
 		Run(s.addSomeLatency()).
 		Return(mockValue, mockWarnings, nil).Once()
 	s.recorderMock.On("measure", "StorageQuerier.LabelValues", s.someLatency, nil).Once()
 
-	actualValue, actualWarnings, err := s.underTest.LabelValues(context.Background(), labelName, matchers...)
+	actualValue, actualWarnings, err := s.underTest.LabelValues(context.Background(), labelName, nil, matchers...)
 
 	s.NoError(err)
 	s.Equal(mockValue, actualValue)

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gogo/protobuf/proto"
+	"github.com/prometheus/prometheus/config"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/prompb"
 	"github.com/prometheus/prometheus/storage/remote"
@@ -199,7 +200,7 @@ func TestStreamingSeriesSet(t *testing.T) {
 		flusher := &mockFlusher{}
 
 		w := remote.NewChunkedWriter(buf, flusher)
-		r := remote.NewChunkedReader(buf, remote.DefaultChunkedReadLimit, nil)
+		r := remote.NewChunkedReader(buf, config.DefaultChunkedReadLimit, nil)
 
 		chunks := buildTestChunks(t)
 		l := []prompb.Label{
@@ -252,7 +253,7 @@ func TestStreamingSeriesSet(t *testing.T) {
 		flusher := &mockFlusher{}
 
 		w := remote.NewChunkedWriter(buf, flusher)
-		r := remote.NewChunkedReader(buf, remote.DefaultChunkedReadLimit, nil)
+		r := remote.NewChunkedReader(buf, config.DefaultChunkedReadLimit, nil)
 
 		chunks := buildTestChunks(t)
 		l := []prompb.Label{

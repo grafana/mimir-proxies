@@ -18,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/model"
+	"github.com/prometheus/prometheus/config"
 	"github.com/prometheus/prometheus/prompb"
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/storage/remote"
@@ -235,7 +236,7 @@ func sampleProtosToSamples(in []prompb.Sample) []model.SamplePair {
 }
 
 func (c *streamClient) handleStreamedResponse(httpResp *http.Response, start time.Time, queryStartMs, queryEndMs int64) storage.SeriesSet {
-	s := remote.NewChunkedReader(httpResp.Body, remote.DefaultChunkedReadLimit, nil)
+	s := remote.NewChunkedReader(httpResp.Body, config.DefaultChunkedReadLimit, nil)
 	return NewStreamingSeriesSet(s, httpResp.Body, queryStartMs, queryEndMs, func() {
 		c.readQueries.Dec()
 		c.readQueriesDuration.WithLabelValues("streamed").Observe(time.Since(start).Seconds())

@@ -42,7 +42,7 @@ func (m MetricDataPayload) GeneratePromMetrics() ([]labels.Labels,
 
 func (m MetricDataPayload) GeneratePromTimeSeries(ctx context.Context) ([]prompb.TimeSeries, error) {
 	log, _ := spanlogger.New(ctx, "graphiteWriter.GeneratePromTimeSeries")
-	defer log.Span.Finish()
+	defer log.Finish()
 
 	series := make([]prompb.TimeSeries, 0, len(m))
 
@@ -67,7 +67,7 @@ func (m MetricDataPayload) GeneratePromTimeSeries(ctx context.Context) ([]prompb
 
 func (m MetricDataPayload) GeneratePreallocTimeseries(ctx context.Context) ([]mimirpb.PreallocTimeseries, error) {
 	log, _ := spanlogger.New(ctx, "graphiteWriter.GeneratePreallocTimeseries")
-	defer log.Span.Finish()
+	defer log.Finish()
 
 	tsSlice := mimirpb.PreallocTimeseriesSliceFromPool()
 
