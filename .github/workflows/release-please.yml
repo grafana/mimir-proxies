@@ -3,17 +3,15 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-  pull-requests: write
-  repository-projects: read
-
 env:
   DEFAULT_GO_VERSION: 1.24.1
 
 name: Run Release Please
 jobs:
   release-please:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
@@ -30,6 +28,8 @@ jobs:
   # The docs say that release-please is supposed to tag releases automatically,
   # but for some reason that never happens, so we do it manually.
   tag-release:
+    permissions:
+      contents: write
     needs: release-please
     if: ${{ needs.release-please.outputs.releases_created }}
     runs-on: ubuntu-latest
@@ -52,6 +52,8 @@ jobs:
           RELEASE_TAG_NAME: ${{ needs.release-please.outputs.release_tag_name }}
           RELEASE_TAG_SHA: ${{ needs.release-please.outputs.release_tag_sha }}
   call-workflow-build-artifacts:
+    permissions:
+      contents: write
     needs: [release-please, tag-release]
     if: ${{ needs.release-please.outputs.releases_created }}
     uses: ./.github/workflows/build-artifacts.yml
