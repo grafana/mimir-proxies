@@ -17,7 +17,7 @@ import (
 	"golang.org/x/net/netutil"
 	"google.golang.org/grpc"
 
-	"github.com/grafana/mimir-proxies/pkg/server/middleware"
+	"github.com/grafana/mimir-graphite/pkg/server/middleware"
 
 	"github.com/gorilla/mux"
 )

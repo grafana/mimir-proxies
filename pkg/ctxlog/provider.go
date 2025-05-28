@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-kit/log"
-	"github.com/grafana/mimir-proxies/pkg/server/middleware"
+	"github.com/grafana/mimir-graphite/pkg/server/middleware"
 )
 
 type key int

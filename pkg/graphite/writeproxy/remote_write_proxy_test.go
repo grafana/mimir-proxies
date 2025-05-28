@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/grafana/mimir-proxies/pkg/errorx"
+	"github.com/grafana/mimir-graphite/pkg/errorx"
 
-	"github.com/grafana/mimir-proxies/pkg/remotewrite/remotewritemock"
+	"github.com/grafana/mimir-graphite/pkg/remotewrite/remotewritemock"
 
 	"github.com/grafana/metrictank/schema"
 	"github.com/grafana/metrictank/schema/msg"
