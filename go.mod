@@ -3,7 +3,6 @@ module github.com/grafana/mimir-proxies
 go 1.24.1
 
 require (
-	github.com/bradfitz/gomemcache v0.0.0-20221031212613-62deef7fc822
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/go-graphite/go-whisper v0.0.0-20230316154527-2337c74b5007
 	github.com/go-kit/log v0.2.1
@@ -24,7 +23,6 @@ require (
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/common v0.64.0
 	github.com/prometheus/prometheus v1.99.0
-	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b
 	github.com/stretchr/testify v1.10.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
