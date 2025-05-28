@@ -1,4 +1,4 @@
-module github.com/grafana/mimir-graphite
+module github.com/grafana/mimir-graphite/v2
 
 go 1.24.1
 
