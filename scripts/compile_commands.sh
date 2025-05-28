@@ -17,7 +17,7 @@ COMMIT_UNIX_TIMESTAMP="$(git show -s --format=%ct "${GIT_COMMIT}")"
 DOCKER_TAG="TODO"
 VERSION=$(cat CHANGELOG.md | grep "^## \[" |head -n 1 | cut -d\[ -f 2- | cut -d\] -f 1)
 
-for cmd in datadog-proxy-writes graphite-proxy-writes mimir-whisper-converter
+for cmd in mimir-whisper-converter
 do
     go build \
     -tags netgo \
