@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/grafana/mimir-graphite/compare/v2.0.0...v2.1.0) (2025-05-28)
+
+
+### Features
+
+* Push release to fix go modules ([#300](https://github.com/grafana/mimir-graphite/issues/300)) ([b9f54f5](https://github.com/grafana/mimir-graphite/commit/b9f54f5372e99230ad8d4a8bbedf0b589ad10d70))
+
 ## [2.0.0](https://github.com/grafana/mimir-graphite/compare/v1.1.2...v2.0.0) (2025-05-28)
 
 
