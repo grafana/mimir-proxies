@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafana/mimir-proxies/pkg/tsdb"
+	"github.com/grafana/mimir-graphite/v2/pkg/tsdb"
 )
 
 // PathsForWorker returns a subset of the paths slice for the worker with the

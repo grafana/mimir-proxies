@@ -13,7 +13,7 @@ import (
 	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/prometheus/prometheus/model/labels"
 
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/convert"
 )
 
 // CommandPass1 performs the first pass conversion to intermediate files. Each

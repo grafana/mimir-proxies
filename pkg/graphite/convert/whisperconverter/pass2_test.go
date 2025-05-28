@@ -12,8 +12,8 @@ import (
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/stretchr/testify/require"
 
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
-	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/convert"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/writeproxy"
 )
 
 // TestCommandPass2 is a sanity-check for pass2.  It confirms that data is

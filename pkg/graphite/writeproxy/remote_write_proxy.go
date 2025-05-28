@@ -17,13 +17,13 @@ import (
 
 	"github.com/grafana/mimir/pkg/util/spanlogger"
 
-	"github.com/grafana/mimir-proxies/pkg/errorx"
+	"github.com/grafana/mimir-graphite/v2/pkg/errorx"
 
 	"github.com/grafana/metrictank/schema"
 	"github.com/grafana/metrictank/schema/msg"
 
-	graphiteAuth "github.com/grafana/mimir-proxies/pkg/graphite/authentication"
-	"github.com/grafana/mimir-proxies/pkg/remotewrite"
+	graphiteAuth "github.com/grafana/mimir-graphite/v2/pkg/graphite/authentication"
+	"github.com/grafana/mimir-graphite/v2/pkg/remotewrite"
 )
 
 type RemoteWriteProxy struct {
