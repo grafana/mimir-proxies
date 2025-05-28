@@ -1,4 +1,4 @@
-module github.com/grafana/mimir-proxies
+module github.com/grafana/mimir-graphite
 
 go 1.24.1
 

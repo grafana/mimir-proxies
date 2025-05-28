@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/grafana/mimir-proxies/pkg/remotewrite/remotewritemock"
+	"github.com/grafana/mimir-graphite/pkg/remotewrite/remotewritemock"
 	"github.com/grafana/mimir/pkg/mimirpb"
 
 	"github.com/opentracing/opentracing-go"

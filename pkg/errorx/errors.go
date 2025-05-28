@@ -12,7 +12,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 
-	"github.com/grafana/mimir-proxies/pkg/errorxpb"
+	"github.com/grafana/mimir-graphite/pkg/errorxpb"
 
 	//nolint:staticcheck
 	protov1 "github.com/golang/protobuf/proto"

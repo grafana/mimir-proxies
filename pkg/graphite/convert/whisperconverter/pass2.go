@@ -15,9 +15,9 @@ import (
 	"github.com/prometheus/prometheus/model/labels"
 	promtsdb "github.com/prometheus/prometheus/tsdb"
 
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
-	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
-	"github.com/grafana/mimir-proxies/pkg/tsdb"
+	"github.com/grafana/mimir-graphite/pkg/graphite/convert"
+	"github.com/grafana/mimir-graphite/pkg/graphite/writeproxy"
+	"github.com/grafana/mimir-graphite/pkg/tsdb"
 )
 
 // CommandPass2 performs the second pass conversion to Mimir blocks. It reads

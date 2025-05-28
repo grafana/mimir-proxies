@@ -19,7 +19,7 @@ go build \
   -tags netgo \
   -o dist/mimir-whisper-converter \
   -ldflags "-w -extldflags '-static'" \
-  "github.com/grafana/mimir-proxies/cmd/mimir-whisper-converter"
+  "github.com/grafana/mimir-graphite/cmd/mimir-whisper-converter"
 
 # Build the docker image
 docker build \

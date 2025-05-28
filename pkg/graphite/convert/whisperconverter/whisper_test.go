@@ -17,8 +17,8 @@ import (
 	"github.com/prometheus/prometheus/tsdb"
 	"github.com/stretchr/testify/require"
 
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
-	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
+	"github.com/grafana/mimir-graphite/pkg/graphite/convert"
+	"github.com/grafana/mimir-graphite/pkg/graphite/writeproxy"
 )
 
 func simpleArchiveInfo(points, secondsPerPoint int) whisper.ArchiveInfo {
