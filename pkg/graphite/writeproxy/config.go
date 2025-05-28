@@ -3,7 +3,7 @@ package writeproxy
 import (
 	"flag"
 
-	"github.com/grafana/mimir-graphite/pkg/remotewrite"
+	"github.com/grafana/mimir-graphite/v2/pkg/remotewrite"
 )
 
 type Config struct {

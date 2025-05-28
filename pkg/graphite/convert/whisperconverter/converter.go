@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-kit/log"
-	"github.com/grafana/mimir-graphite/pkg/graphite/convert"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/convert"
 	"github.com/prometheus/prometheus/model/labels"
 )
 

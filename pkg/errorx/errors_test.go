@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 
-	"github.com/grafana/mimir-graphite/pkg/errorxpb"
+	"github.com/grafana/mimir-graphite/v2/pkg/errorxpb"
 
 	grpcStatus "google.golang.org/grpc/status"
 )
