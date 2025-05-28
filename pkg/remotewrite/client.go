@@ -15,7 +15,7 @@ import (
 	"github.com/grafana/mimir/pkg/distributor"
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
 
-	"github.com/grafana/mimir-proxies/pkg/appcommon"
+	"github.com/grafana/mimir-graphite/v2/pkg/appcommon"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/snappy"
@@ -26,7 +26,7 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 
-	"github.com/grafana/mimir-proxies/pkg/errorx"
+	"github.com/grafana/mimir-graphite/v2/pkg/errorx"
 )
 
 const (

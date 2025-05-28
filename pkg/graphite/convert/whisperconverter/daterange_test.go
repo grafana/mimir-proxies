@@ -20,7 +20,9 @@ import (
 func TestCommandDateRange(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("/tmp", "testCommandDateRange*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
 	whisper.Now = func() time.Time {
 		t, err := time.Parse("2006-01-02", "2022-06-01")
 		if err != nil {

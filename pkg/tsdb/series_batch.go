@@ -3,6 +3,7 @@ package tsdb
 import (
 	"container/heap"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -13,7 +14,7 @@ import (
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/tsdb/chunks"
 
-	"github.com/prometheus/prometheus/tsdb/errors"
+	promErrors "github.com/prometheus/prometheus/tsdb/errors"
 )
 
 type series struct {
@@ -85,7 +86,7 @@ func writeSeriesToFile(filename string, sortedSeries []series) error {
 	sn := snappy.NewBufferedWriter(f)
 	enc := gob.NewEncoder(sn)
 
-	errs := errors.NewMulti()
+	errs := promErrors.NewMulti()
 
 	for _, s := range sortedSeries {
 		err := enc.Encode(s)
@@ -176,7 +177,7 @@ func newSeriesIterator(filenames []string) (*seriesIterator, error) {
 func (sit *seriesIterator) NextSeries() (series, error) {
 	for len(sit.heap) > 0 {
 		result, err := sit.heap[0].Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			// End of file, remove it from heap, and try next file.
 			heap.Remove(&sit.heap, 0)
 			continue
@@ -202,7 +203,7 @@ func (sit *seriesIterator) NextSeries() (series, error) {
 
 // Close all files.
 func (sit *seriesIterator) Close() error {
-	errs := errors.NewMulti()
+	errs := promErrors.NewMulti()
 	for _, f := range sit.files {
 		errs.Add(f.Close())
 	}

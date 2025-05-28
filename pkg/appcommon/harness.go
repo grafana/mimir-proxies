@@ -19,11 +19,11 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/grafana/mimir-proxies/pkg/ctxlog"
-	"github.com/grafana/mimir-proxies/pkg/internalserver"
-	"github.com/grafana/mimir-proxies/pkg/server"
-	"github.com/grafana/mimir-proxies/pkg/server/middleware"
-	"github.com/grafana/mimir-proxies/pkg/stopsignal"
+	"github.com/grafana/mimir-graphite/v2/pkg/ctxlog"
+	"github.com/grafana/mimir-graphite/v2/pkg/internalserver"
+	"github.com/grafana/mimir-graphite/v2/pkg/server"
+	"github.com/grafana/mimir-graphite/v2/pkg/server/middleware"
+	"github.com/grafana/mimir-graphite/v2/pkg/stopsignal"
 )
 
 var (
@@ -91,7 +91,7 @@ func New(cfg Config, reg prometheus.Registerer, metricPrefix string, tracer open
 	// If the function fails, make sure all resources are cleaned up before returning the error.
 	defer func() {
 		if err != nil {
-			app.Close()
+			_ = app.Close()
 		}
 	}()
 

@@ -1,11 +1,12 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
 
-	"github.com/grafana/mimir-proxies/pkg/util/bytereplacer"
+	"github.com/grafana/mimir-graphite/v2/pkg/util/bytereplacer"
 
 	"github.com/gorilla/mux"
 )
@@ -21,7 +22,7 @@ func getRouteName(routeMatcher RouteMatcher, r *http.Request) string {
 		return ""
 	}
 
-	if routeMatch.MatchErr == mux.ErrNotFound {
+	if errors.Is(routeMatch.MatchErr, mux.ErrNotFound) {
 		return "notfound"
 	}
 

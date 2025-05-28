@@ -18,7 +18,7 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/prometheus/model/labels"
 
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert/whisperconverter"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/convert/whisperconverter"
 )
 
 const (
@@ -160,23 +160,23 @@ Example Usage:
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Fprintf(os.Stdout, "%s\n", version)
+		_, _ = fmt.Fprintf(os.Stdout, "%s\n", version)
 		os.Exit(0)
 	}
 
 	if len(flag.Args()) != 1 {
-		fmt.Fprintf(os.Stderr, "ERROR: Need exactly one command (%s)\n", flag.Args())
+		_, _ = fmt.Fprintf(os.Stderr, "ERROR: Need exactly one command (%s)\n", flag.Args())
 		flag.Usage()
 		os.Exit(1)
 	}
 	if *workerID >= *workerCount {
-		fmt.Fprintf(os.Stderr, "ERROR: Worker ID must be <= the number of workers (%d and %d)\n", *workerID, *workerCount)
+		_, _ = fmt.Fprintf(os.Stderr, "ERROR: Worker ID must be <= the number of workers (%d and %d)\n", *workerID, *workerCount)
 		flag.Usage()
 		os.Exit(1)
 	}
 	command := flag.Args()[0]
 	if *whisperDirectory == "" {
-		fmt.Fprintf(os.Stderr, "ERROR: Need to specify --whisper-directory\n")
+		_, _ = fmt.Fprintf(os.Stderr, "ERROR: Need to specify --whisper-directory\n")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -184,24 +184,24 @@ Example Usage:
 	var dates []time.Time
 	if command != DATERANGE && command != FILELIST {
 		if *startDateFlag == "" {
-			fmt.Fprintf(os.Stderr, "ERROR: Need to specify --start-date\n")
+			_, _ = fmt.Fprintf(os.Stderr, "ERROR: Need to specify --start-date\n")
 			flag.Usage()
 			os.Exit(1)
 		}
 		startDate, err := time.Parse("2006-01-02", *startDateFlag)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR: error parsing --start-date: %v\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "ERROR: error parsing --start-date: %v\n", err)
 			flag.Usage()
 			os.Exit(1)
 		}
 		endDate, err := time.Parse("2006-01-02", *endDateFlag)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR: error parsing --end-date: %v\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "ERROR: error parsing --end-date: %v\n", err)
 			flag.Usage()
 			os.Exit(1)
 		}
 		if startDate.After(endDate) {
-			fmt.Fprintf(os.Stderr, "ERROR: end date must be same or after start date\n")
+			_, _ = fmt.Fprintf(os.Stderr, "ERROR: end date must be same or after start date\n")
 			flag.Usage()
 			os.Exit(1)
 		}

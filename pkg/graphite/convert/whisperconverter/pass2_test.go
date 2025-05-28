@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/go-kit/log"
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
-	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
 	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/stretchr/testify/require"
+
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/convert"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/writeproxy"
 )
 
 // TestCommandPass2 is a sanity-check for pass2.  It confirms that data is
@@ -20,11 +21,15 @@ import (
 func TestCommandPass2(t *testing.T) {
 	tmpIntermediateDir, err := os.MkdirTemp("/tmp", "TestCommandPass2.intermediate-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpIntermediateDir)
+	defer func() {
+		_ = os.RemoveAll(tmpIntermediateDir)
+	}()
 
 	tmpBlockDir, err := os.MkdirTemp("/tmp", "TestCommandPass2.blocks-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpBlockDir)
+	defer func() {
+		_ = os.RemoveAll(tmpBlockDir)
+	}()
 
 	data1 := createData([]string{"foo.bar.baz", "my.cool.metric", "something.else"})
 	data2 := createData([]string{"my.cool.metric", "something.else", "unique.metric"})
@@ -64,7 +69,7 @@ func TestCommandPass2(t *testing.T) {
 	blockToRemove := checkBlockSimpleValid(t, tmpBlockDir)
 
 	// Test resume by removing one of the blocks
-	os.RemoveAll(tmpBlockDir + "/" + blockToRemove)
+	_ = os.RemoveAll(tmpBlockDir + "/" + blockToRemove)
 
 	// Rerun the test, keeping blocks that still exist.
 	c = NewWhisperConverter(
@@ -117,7 +122,9 @@ func createIntermediate(path string, data map[string]*mimirpb.TimeSeries) error 
 	if err != nil {
 		return err
 	}
-	defer table.Close()
+	defer func() {
+		_ = table.Close()
+	}()
 
 	for k, v := range data {
 		err = table.Append(k, v)

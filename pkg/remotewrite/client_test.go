@@ -12,7 +12,7 @@ import (
 	"github.com/grafana/mimir/pkg/frontend/querymiddleware"
 	"github.com/grafana/mimir/pkg/mimirpb"
 
-	"github.com/grafana/mimir-proxies/pkg/errorx"
+	"github.com/grafana/mimir-graphite/v2/pkg/errorx"
 
 	"github.com/grafana/dskit/user"
 

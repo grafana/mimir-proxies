@@ -15,9 +15,9 @@ import (
 	"github.com/prometheus/prometheus/model/labels"
 	promtsdb "github.com/prometheus/prometheus/tsdb"
 
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
-	"github.com/grafana/mimir-proxies/pkg/graphite/writeproxy"
-	"github.com/grafana/mimir-proxies/pkg/tsdb"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/convert"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/writeproxy"
+	"github.com/grafana/mimir-graphite/v2/pkg/tsdb"
 )
 
 // CommandPass2 performs the second pass conversion to Mimir blocks. It reads
@@ -90,7 +90,9 @@ func (c *WhisperConverter) createOneBlock(fname, blocksDir string) error {
 	if err != nil {
 		return err
 	}
-	defer i.Close()
+	defer func() {
+		_ = i.Close()
+	}()
 	index, err := i.Index()
 	if err != nil {
 		return err

@@ -16,7 +16,7 @@ permissions:
   repository-projects: read
 
 env:
-  DEFAULT_GO_VERSION: 1.23
+  DEFAULT_GO_VERSION: 1.24.1
 
 name: Build Artifacts
 jobs:
@@ -29,14 +29,16 @@ jobs:
         # Needed for the releaser to know what version to tag.
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.DEFAULT_GO_VERSION }}
+          cache: false
 
       - name: Build Archives
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@5fdedb94abba051217030cc86d4523cf3f02243d # v4.6.0
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,7 +48,7 @@ jobs:
           args: release --skip=publish,announce --clean
 
       - name: Bundle release assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           draft: true
           append_body: true

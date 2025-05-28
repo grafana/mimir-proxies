@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.1.0](https://github.com/grafana/mimir-graphite/compare/v2.0.0...v2.1.0) (2025-05-28)
+
+
+### Features
+
+* Push release to fix go modules ([#300](https://github.com/grafana/mimir-graphite/issues/300)) ([b9f54f5](https://github.com/grafana/mimir-graphite/commit/b9f54f5372e99230ad8d4a8bbedf0b589ad10d70))
+
+## [2.0.0](https://github.com/grafana/mimir-graphite/compare/v1.1.2...v2.0.0) (2025-05-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove datadog-write-proxy and graphite-write-proxy ([#293](https://github.com/grafana/mimir-graphite/issues/293))
+
+### Features
+
+* **errorx:** add Request Timeout http error handling ([#245](https://github.com/grafana/mimir-graphite/issues/245)) ([ad9a596](https://github.com/grafana/mimir-graphite/commit/ad9a596b493bd65bf91f1356a01e00e2d63f9669))
+* utilities for manipulating blocks ([#152](https://github.com/grafana/mimir-graphite/issues/152)) ([9e2e794](https://github.com/grafana/mimir-graphite/commit/9e2e7946c33b256ee474b804b42e58c0da61bf82))
+
+
+### Bug Fixes
+
+* **actions:** simplify dependabot approver ([#283](https://github.com/grafana/mimir-graphite/issues/283)) ([f11c254](https://github.com/grafana/mimir-graphite/commit/f11c254c8397e9bae25405bc352e05487464b50f))
+* add optional params to remoteread api for client_golang 1.20.x ([#207](https://github.com/grafana/mimir-graphite/issues/207)) ([03b451c](https://github.com/grafana/mimir-graphite/commit/03b451cc4a0816fce917bac7dc683bb526f4a2d7))
+* **zizmor:** restricted permissions for release please ([#282](https://github.com/grafana/mimir-graphite/issues/282)) ([208c108](https://github.com/grafana/mimir-graphite/commit/208c108904c691c42761bf8ea0987021b8d59b54))
+
+
+### Code Refactoring
+
+* Remove datadog-write-proxy and graphite-write-proxy ([#293](https://github.com/grafana/mimir-graphite/issues/293)) ([8047c70](https://github.com/grafana/mimir-graphite/commit/8047c701869bf98cf6d7cc62d09a922451a7cde1))
+
 ## [1.1.2](https://github.com/grafana/mimir-proxies/compare/v1.1.1...v1.1.2) (2024-03-19)
 
 

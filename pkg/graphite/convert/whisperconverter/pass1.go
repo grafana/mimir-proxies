@@ -10,9 +10,10 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/pkg/errors"
 
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert"
 	"github.com/grafana/mimir/pkg/mimirpb"
 	"github.com/prometheus/prometheus/model/labels"
+
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/convert"
 )
 
 // CommandPass1 performs the first pass conversion to intermediate files. Each
@@ -35,7 +36,7 @@ func (c *WhisperConverter) CommandPass1(targetWhisperFiles, intermediateDir stri
 	intermediateFiles := c.openIntermediateFiles(intermediateDir, resumeIntermediate)
 	defer func() {
 		for _, i := range intermediateFiles {
-			i.Close()
+			_ = i.Close()
 		}
 	}()
 
@@ -44,7 +45,9 @@ func (c *WhisperConverter) CommandPass1(targetWhisperFiles, intermediateDir stri
 	if err != nil {
 		return errors.Wrap(err, "error opening processsedMetrics intermediate file")
 	}
-	defer progressFile.Close()
+	defer func() {
+		_ = progressFile.Close()
+	}()
 
 	for i := 0; i < c.threads; i++ {
 		go c.createIntermediateFromChan(fileChan, intermediateFiles, progressFile, skippableMetrics, wgReads)

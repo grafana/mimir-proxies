@@ -83,18 +83,18 @@ func NewBuilder(workDirectory string, opts Options) (*Builder, error) {
 
 	blockDir := filepath.Join(workDirectory, blockID.String())
 	if err := os.MkdirAll(blockDir, permDir); err != nil {
-		return nil, fmt.Errorf("failed to create block directory %v: %v", blockDir, err)
+		return nil, fmt.Errorf("failed to create block directory %v: %w", blockDir, err)
 	}
 
 	blockTempDir := filepath.Join(blockDir, "temp")
 	if err := os.MkdirAll(blockTempDir, permDir); err != nil {
-		return nil, fmt.Errorf("failed to create temp directory %v: %v", blockTempDir, err)
+		return nil, fmt.Errorf("failed to create temp directory %v: %w", blockTempDir, err)
 	}
 
 	// Create unsorted chunks under temp dir, so that deleting temp dir will delete everything.
 	unsortedChunksDir := filepath.Join(blockTempDir, "unsorted_chunks")
 	if err := os.MkdirAll(unsortedChunksDir, permDir); err != nil {
-		return nil, fmt.Errorf("failed to create chunks directory %v: %v", unsortedChunksDir, err)
+		return nil, fmt.Errorf("failed to create chunks directory %v: %w", unsortedChunksDir, err)
 	}
 
 	cw, err := chunks.NewWriter(unsortedChunksDir)
@@ -221,7 +221,7 @@ func (b *Builder) FinishBlock(ctx context.Context, extendMeta func(tsdb.BlockMet
 
 	err = os.RemoveAll(b.tempDir)
 	if err != nil {
-		return b.blockID, fmt.Errorf("failed to delete temp files for the block: %v", err)
+		return b.blockID, fmt.Errorf("failed to delete temp files for the block: %w", err)
 	}
 
 	return b.blockID, writeMetaFile(b.blockID, b.blockDir, minT, maxT, stats, extendMeta)
@@ -257,12 +257,12 @@ func writeMetaFile(blockID ulid.ULID, blockDir string, minT, maxT int64, stats t
 	extendedMeta := extendMeta(meta)
 	jsonMeta, err := json.MarshalIndent(extendedMeta, "", "\t")
 	if err != nil {
-		return fmt.Errorf("failed to marshal JSON: %v", err)
+		return fmt.Errorf("failed to marshal JSON: %w", err)
 	}
 
 	metaPath := filepath.Join(blockDir, "meta.json")
 	if err := os.WriteFile(metaPath, jsonMeta, permFile); err != nil {
-		return fmt.Errorf("failed to write %s: %v", metaPath, err)
+		return fmt.Errorf("failed to write %s: %w", metaPath, err)
 	}
 	return nil
 }
@@ -291,7 +291,7 @@ func addSeriesToIndex(indexWriter *index.Writer, chunksWriter *chunks.Writer, se
 		for ix := range ser.Chunks {
 			ser.Chunks[ix].Chunk, _, err = unsortedChunksReader.ChunkOrIterable(ser.Chunks[ix])
 			if err != nil {
-				return stats, minT, maxT, fmt.Errorf("failed to load chunk %d: %v", ser.Chunks[ix].Ref, err)
+				return stats, minT, maxT, fmt.Errorf("failed to load chunk %d: %w", ser.Chunks[ix].Ref, err)
 			}
 			if ser.Chunks[ix].Chunk == nil {
 				return stats, minT, maxT, fmt.Errorf("failed to load chunk %d: chunk is nil", ser.Chunks[ix].Ref)
@@ -326,13 +326,13 @@ func addSeriesToIndex(indexWriter *index.Writer, chunksWriter *chunks.Writer, se
 		ref++
 		err = indexWriter.AddSeries(ref, ser.Metric, ser.Chunks...)
 		if err != nil {
-			return stats, minT, maxT, fmt.Errorf("failed to add series %v to index: %v", ser.Metric.String(), err)
+			return stats, minT, maxT, fmt.Errorf("failed to add series %v to index: %w", ser.Metric.String(), err)
 		}
 	}
 
 	// We expect io.EOF from NextSeries.
-	if err != io.EOF {
-		return stats, minT, maxT, fmt.Errorf("io.EOF expected, got: %v", err)
+	if !errors.Is(err, io.EOF) {
+		return stats, minT, maxT, fmt.Errorf("io.EOF expected, got: %w", err)
 	}
 	return stats, minT, maxT, nil
 }
@@ -352,7 +352,7 @@ func addSymbolsToIndexWriter(indexWriter *index.Writer, symbolFiles []string) er
 	}
 
 	// io.EOF is reported after all symbols were read.
-	if err == io.EOF {
+	if errors.Is(err, io.EOF) {
 		err = nil
 	}
 
@@ -503,13 +503,13 @@ func CreateBlock(ctx context.Context, series []storage.Series, dir string, exten
 
 	blockDir := filepath.Join(dir, blockID.String())
 	if err := os.MkdirAll(blockDir, permDir); err != nil {
-		return blockID, fmt.Errorf("failed to create block directory %v: %v", blockDir, err)
+		return blockID, fmt.Errorf("failed to create block directory %v: %w", blockDir, err)
 	}
 
 	// under temp, so that deleting temp will delete everything.
 	chunksDir := filepath.Join(blockDir, "chunks")
 	if err := os.MkdirAll(chunksDir, permDir); err != nil {
-		return blockID, fmt.Errorf("failed to create chunks directory %v: %v", chunksDir, err)
+		return blockID, fmt.Errorf("failed to create chunks directory %v: %w", chunksDir, err)
 	}
 
 	closers := []io.Closer(nil)
@@ -597,7 +597,7 @@ func addSortedInMemorySeriesToIndex(indexWriter *index.Writer, chunksWriter *chu
 		// Now we're ready to add series to TSDB index.
 		ref++
 		if err := indexWriter.AddSeries(ref, ser.Labels(), chks...); err != nil {
-			return stats, minT, maxT, fmt.Errorf("failed to add series %v to index: %v", lbls.String(), err)
+			return stats, minT, maxT, fmt.Errorf("failed to add series %v to index: %w", lbls.String(), err)
 		}
 	}
 

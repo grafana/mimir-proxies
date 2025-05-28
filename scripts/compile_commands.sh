@@ -17,7 +17,7 @@ COMMIT_UNIX_TIMESTAMP="$(git show -s --format=%ct "${GIT_COMMIT}")"
 DOCKER_TAG="TODO"
 VERSION=$(cat CHANGELOG.md | grep "^## \[" |head -n 1 | cut -d\[ -f 2- | cut -d\] -f 1)
 
-for cmd in datadog-proxy-writes graphite-proxy-writes mimir-whisper-converter
+for cmd in mimir-whisper-converter
 do
     go build \
     -tags netgo \
@@ -26,10 +26,10 @@ do
         -w \
         -extldflags '-static' \
         -X 'main.version=$VERSION' \
-        -X 'github.com/grafana/mimir-proxies/pkg/appcommon.CommitUnixTimestamp=${COMMIT_UNIX_TIMESTAMP}' \
-        -X 'github.com/grafana/mimir-proxies/pkg/appcommon.DockerTag=${DOCKER_TAG}' \
+        -X 'github.com/grafana/mimir-graphite/pkg/appcommon.CommitUnixTimestamp=${COMMIT_UNIX_TIMESTAMP}' \
+        -X 'github.com/grafana/mimir-graphite/pkg/appcommon.DockerTag=${DOCKER_TAG}' \
         " \
-    "github.com/grafana/mimir-proxies/cmd/${cmd}"
+    "github.com/grafana/mimir-graphite/cmd/${cmd}"
 
     echo "Succesfully built ${cmd} into dist/${cmd}"
 done

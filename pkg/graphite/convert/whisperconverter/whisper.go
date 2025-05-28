@@ -18,17 +18,19 @@ import (
 func WhisperToMimirSamples(whisperFile, name string) ([]mimirpb.Sample, error) {
 	fd, err := os.Open(whisperFile)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open whisper file: %v", err)
+		return nil, fmt.Errorf("failed to open whisper file: %w", err)
 	}
-	defer fd.Close()
+	defer func() {
+		_ = fd.Close()
+	}()
 	w, err := newIOReaderArchive(fd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open whisper archive: %v", err)
+		return nil, fmt.Errorf("failed to open whisper archive: %w", err)
 	}
 
 	points, err := ReadPoints(w, name)
 	if err != nil {
-		return nil, fmt.Errorf("error dumping metric from whisper: %v", err)
+		return nil, fmt.Errorf("error dumping metric from whisper: %w", err)
 	}
 
 	return ToMimirSamples(points)

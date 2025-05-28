@@ -3,20 +3,18 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-  pull-requests: write
-  repository-projects: read
-
 env:
-  DEFAULT_GO_VERSION: 1.23
+  DEFAULT_GO_VERSION: 1.24.1
 
 name: Run Release Please
 jobs:
   release-please:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - uses: google-github-actions/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
         id: release
         with:
           command: manifest
@@ -30,6 +28,8 @@ jobs:
   # The docs say that release-please is supposed to tag releases automatically,
   # but for some reason that never happens, so we do it manually.
   tag-release:
+    permissions:
+      contents: write
     needs: release-please
     if: ${{ needs.release-please.outputs.releases_created }}
     runs-on: ubuntu-latest
@@ -40,18 +40,26 @@ jobs:
         # Needed for the releaser to know what version to tag.
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Tag the created release
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git tag ${{ needs.release-please.outputs.release_tag_name }} ${{ needs.release-please.outputs.release_tag_sha }} -m ${{ needs.release-please.outputs.release_tag_name }}
-          git push origin ${{ needs.release-please.outputs.release_tag_name }}
+          git tag "$RELEASE_TAG_NAME" "$RELEASE_TAG_SHA" -m "$RELEASE_TAG_NAME"
+          git push origin "$RELEASE_TAG_NAME"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG_NAME: ${{ needs.release-please.outputs.release_tag_name }}
+          RELEASE_TAG_SHA: ${{ needs.release-please.outputs.release_tag_sha }}
   call-workflow-build-artifacts:
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: read
     needs: [release-please, tag-release]
     if: ${{ needs.release-please.outputs.releases_created }}
     uses: ./.github/workflows/build-artifacts.yml
     with:
       release_tag_name: ${{ needs.release-please.outputs.release_tag_name }}
-    secrets: inherit
+    # We trust our own action, hence ignore secrets-inherit.
+    secrets: inherit # zizmor: ignore[secrets-inherit]

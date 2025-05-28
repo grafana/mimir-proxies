@@ -39,7 +39,9 @@ func TestGetWhisperListIntoChan(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			tmpDir, err := os.MkdirTemp("/tmp", test.name+"*")
 			require.NoError(t, err)
-			defer os.RemoveAll(tmpDir)
+			defer func() {
+				_ = os.RemoveAll(tmpDir)
+			}()
 
 			for _, filename := range test.testFiles {
 				_, err = os.Create(tmpDir + "/" + filename)
@@ -55,7 +57,9 @@ func TestGetWhisperListIntoChan(t *testing.T) {
 				targetWhisperFiles = tmpDir + "/targetWhisperFiles.out"
 				f, err := os.Create(targetWhisperFiles)
 				require.NoError(t, err)
-				defer f.Close()
+				defer func() {
+					_ = f.Close()
+				}()
 
 				for _, file := range test.targetWhisperFiles {
 					_, err = f.WriteString(tmpDir + "/" + file + "\n")

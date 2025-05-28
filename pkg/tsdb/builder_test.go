@@ -270,7 +270,7 @@ type chunksIterator struct {
 	it     chunkenc.Iterator
 }
 
-func (c chunksIterator) Seek(_ int64) bool {
+func (c chunksIterator) Seek(_ int64) bool { //nolint: govet
 	panic("implement me")
 }
 
@@ -326,7 +326,7 @@ func (s *samplesIterator) Next() chunkenc.ValueType {
 	return chunkenc.ValNone
 }
 
-func (s samplesIterator) Seek(int64) chunkenc.ValueType {
+func (s samplesIterator) Seek(int64) chunkenc.ValueType { // nolint: govet
 	panic("not implemented")
 }
 
