@@ -18,7 +18,7 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/prometheus/model/labels"
 
-	"github.com/grafana/mimir-proxies/pkg/graphite/convert/whisperconverter"
+	"github.com/grafana/mimir-graphite/v2/pkg/graphite/convert/whisperconverter"
 )
 
 const (

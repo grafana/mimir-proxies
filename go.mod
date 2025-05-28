@@ -1,9 +1,8 @@
-module github.com/grafana/mimir-proxies
+module github.com/grafana/mimir-graphite/v2
 
 go 1.24.1
 
 require (
-	github.com/bradfitz/gomemcache v0.0.0-20221031212613-62deef7fc822
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/go-graphite/go-whisper v0.0.0-20230316154527-2337c74b5007
 	github.com/go-kit/log v0.2.1
@@ -17,14 +16,13 @@ require (
 	github.com/kisielk/whisper-go v0.0.0-20140112135752-82e8091afdea
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f
 	github.com/oklog/run v1.1.0
-	github.com/oklog/ulid/v2 v2.1.0
+	github.com/oklog/ulid/v2 v2.1.1
 	github.com/opentracing-contrib/go-stdlib v1.1.0
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/common v0.64.0
 	github.com/prometheus/prometheus v1.99.0
-	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b
 	github.com/stretchr/testify v1.10.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
@@ -33,7 +31,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.36.0
 	go.opentelemetry.io/otel/trace v1.36.0
 	golang.org/x/net v0.40.0
-	google.golang.org/grpc v1.72.1
+	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.6
 )
 

@@ -54,6 +54,8 @@ jobs:
   call-workflow-build-artifacts:
     permissions:
       contents: write
+      pull-requests: write
+      repository-projects: read
     needs: [release-please, tag-release]
     if: ${{ needs.release-please.outputs.releases_created }}
     uses: ./.github/workflows/build-artifacts.yml
